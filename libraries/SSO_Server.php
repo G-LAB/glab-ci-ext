@@ -1,7 +1,7 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * G LAB Single Sign-on (SSO) Library for Code Igniter
+ * G LAB Single Sign-on (SSO) Library for Code Igniter v2
  * Written by Ryan Brodkin
  * Copyright 2010
  */

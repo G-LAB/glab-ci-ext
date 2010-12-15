@@ -3,7 +3,7 @@
 require '/nfs/c06/h05/mnt/91576/data/lib/CI-Custom/libraries/S3.php';
 
 /**
- * G LAB Amazon S3 Backup Library for Code Igniter
+ * G LAB Amazon S3 Backup Library for Code Igniter v2
  * Written by Ryan Brodkin
  * Copyright 2010
  */

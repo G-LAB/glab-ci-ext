@@ -1,7 +1,7 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * G-LAB Plesk Library for Code Igniter
+ * G-LAB Plesk Library for Code Igniter v2
  * Written by Ryan Brodkin
  * Copyright 2010
  */
