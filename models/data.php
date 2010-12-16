@@ -97,5 +97,4 @@ class Data extends CI_Model {
 	}
 
 }
-
 // End of File
