@@ -49,9 +49,8 @@ class S3_Backup extends S3 {
 		$expired = array();
 		$success = array();
 		
+		// Separate Out File Types (Currently Unused)
 		foreach ($backups as $backupgroup => $data) {
-			
-			
 			
 			// Year
 			foreach ($data as $year => $ydata) {
