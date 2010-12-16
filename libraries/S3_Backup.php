@@ -56,16 +56,19 @@ class S3_Backup extends S3 {
 			// Year
 			foreach ($data as $year => $ydata) {
 				
+				// Month
 				foreach ($ydata as $month => $mdata) {
 					
 					$maxTime = mktime(23,59,59,$month,cal_days_in_month(CAL_GREGORIAN, $month, $year),$year);
 					if ($maxTime < $maxAge) $expired = array_merge($expired,$this->getChildren($mdata));
 					
+					// Day
 					else foreach ($mdata as $day=>$ddata) {
 						
 						$maxTime = mktime(23,59,59,$month,$day,$year);
 						if ($maxTime < $maxAge) $expired = array_merge($expired,$this->getChildren($ddata));
 						
+						// Hour
 						else foreach ($ddata as $hour=>$hdata) {
 							
 							$maxTime = mktime($hour,59,59,$month,$day,$year);
