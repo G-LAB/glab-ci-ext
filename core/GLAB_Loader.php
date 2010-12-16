@@ -20,7 +20,7 @@ class GLAB_Loader extends CI_Loader {
 		));
 		
 		$CI->rest->format($format);
-		//$CI->rest->api_key('76f5fb88340ddd58b93e9fae1dd17e488a8753ba');
+		
 		
 		// Reformat Paramaters as Array
 		if (is_numeric($params)) $params = array('id'=>$params);
