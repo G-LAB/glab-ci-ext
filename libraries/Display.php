@@ -36,7 +36,7 @@ class Display {
 	
 	function __construct () {
 		$this->CI =& get_instance();
-		
+		echo 'hello world';
 		// Set Default Slider Media
 		if (strtotime('November 18') < time()) $this->addSliderImage('HappyHolidays.png',FALSE,FALSE,FALSE,TRUE);
 		$this->addSliderImage('Hosting.png','products/web_hosting',FALSE,FALSE,TRUE);
