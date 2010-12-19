@@ -16,7 +16,7 @@ class SSO_Lib {
 		
 		// Redirect on SSL Cookie Checksum Mismatch
 		if (
-			!strpos($this->CI->input->server('ACCESS_DOMAIN'), 'sso.glabstudios.com')
+			!strpos($this->CI->input->server('SERVER_NAME'), 'sso.glabstudios.com')
 			&& $this->CI->input->server('HTTPS') 
 			&& $this->CI->session->userdata('eid')
 			&& $this->CI->input->cookie(config_item('cookie_prefix').'sso_checksum') != $this->cookieChecksum(FALSE)
