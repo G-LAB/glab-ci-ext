@@ -92,7 +92,7 @@ function pagenav ($actionName=null,$actionURI=null) {
 	else return FALSE;
 }
 
-function related ($title=FALSE) {
+function related ($title=FALSE, $number_of_items=FALSE) {
 	
 	$CI =& get_instance();
 	$CI->load->helper('typography');
@@ -117,11 +117,28 @@ function related ($title=FALSE) {
 								"description" => "The Internet moves fast. You need a website that is able to keep up with the times and serve your customer's needs.  Our team is ready to do it.\nUpdate your website now!",
 								"uri" => "services/web_development"
 							);
+	
 	if (!$title) $title = 'Other services you might enjoy...';
 	
+	// Get All Passed Arguments
 	$active = func_get_args();
+	
+	// Unset $title Argument
 	unset($active[0]);
-	if (count($active) < 1) $active = array_keys($services);
+	
+	// Check If Minimum Number of Items Is Requested
+	if (!is_numeric($number_of_items)) $number_of_items = 3;
+	if ($number_of_items > count($services)) $number_of_items = count($services);
+	
+	// Unset Active Item If Not A String
+	foreach ($active as $key=>$value) if (!is_string($value)) unset($active[$key]);
+	
+	// Fill In Array if Empty or Too Few Items
+	if (count($active) < $number_of_items) {
+		$keys = array_keys($services);
+		shuffle($keys);
+		$active = array_merge(array_slice($keys, 0, ($number_of_items - count($active))), $active);
+	}
 	
 	foreach ($active as $realkey=>$key)
 		if (!isset($services[$key])) unset($active[$realkey]);
