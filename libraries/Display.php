@@ -38,8 +38,14 @@ class Display {
 		$this->CI =& get_instance();
 		
 		// Set Default Slider Media
+		$this->addSliderImage('Default-BigWorld.png',FALSE,FALSE,FALSE,TRUE);
+		$this->addSliderImage('Default-TimeForChange.png',FALSE,FALSE,FALSE,TRUE);
+		$this->addSliderImage('Default-FriendlySkies.png',FALSE,FALSE,FALSE,TRUE);
+		shuffle($this->sliderDefault);
+		
+		// Set Default Holiday Slider Media
 		if (strtotime('November 18') < time()) $this->addSliderImage('HappyHolidays.png',FALSE,FALSE,FALSE,TRUE);
-		$this->addSliderImage('Hosting.png','products/web_hosting',FALSE,FALSE,TRUE);
+		
 	}
 	
 	function __destruct () {
