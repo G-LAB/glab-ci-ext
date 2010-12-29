@@ -107,8 +107,8 @@ function related ($title=FALSE, $number_of_items=FALSE) {
 								"description" => "Why trust us with your website? There’s more to it than just really fast servers.  Get state of the art technology at a price that's right.\nStarting at only $7/mo.",
 								"uri" => "products/web_hosting"
 							);
-	$services["media_production"] = array(
-								"title" => "Media Production",
+	$services["video_production"] = array(
+								"title" => "Video Production",
 								"description" => "Become the next viral craze, train your employees, or just inform your clients about the products and services that you provide.\nSell yourself in video!",
 								"uri" => "services/media_production"
 							);
@@ -116,6 +116,26 @@ function related ($title=FALSE, $number_of_items=FALSE) {
 								"title" => "Web Development",
 								"description" => "The Internet moves fast. You need a website that is able to keep up with the times and serve your customer's needs.  Our team is ready to do it.\nUpdate your website now!",
 								"uri" => "services/web_development"
+							);
+	$services["advertising"] = array(
+								"title" => "Online Advertising",
+								"description" => "It's great to have a website, but you need advertising if people are going to find it.  With the advent of social media, it is easier to target your message than ever before!",
+								"uri" => "services/advertising"
+							);
+	$services["graphic_design"] = array(
+								"title" => "Graphic Design",
+								"description" => "It doesn't matter whether you need a design for your latest brochure, a new menu layout, or a banner for your online ad... web or print, we do it all.",
+								"uri" => "services/media_production/graphic_design"
+							);
+	$services["photography"] = array(
+								"title" => "Photography",
+								"description" => "Don't just hire anyone to photograph your business.  Photography needs to be skillfully executed to portray your company the way it deserves.",
+								"uri" => "services/media_production/photography"
+							);
+	$services["marketing_plans"] = array(
+								"title" => "Marketing Plans",
+								"description" => "Where should you spend your marketing budget and why?  Don't guess.  We'll tell you. Spend your dollars wisely and make your money work for you.",
+								"uri" => "services/marketing/marketing_plans"
 							);
 	
 	if (!$title) $title = 'Other services you might enjoy...';
