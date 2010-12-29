@@ -44,3 +44,8 @@ function site_url($uri = '',$secure=FALSE) {
 	if ($secure) return "https://".ltrim($CI->config->site_url($uri),'http://');
 	else return $CI->config->site_url($uri);
 }
+
+function company_url ($uri) {
+	if (preg_match("/staging/", $_SERVER['SERVER_NAME'])) return 'http://staging.glabstudios.com/'.$uri;
+	else return 'http://glabstudios.com/'.$uri;
+}
