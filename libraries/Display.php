@@ -44,7 +44,8 @@ class Display {
 		shuffle($this->sliderDefault);
 		
 		// Set Default Holiday Slider Media
-		if (strtotime('November 18') < time()) $this->addSliderImage('HappyHolidays.png',FALSE,FALSE,FALSE,TRUE);
+		if (strtotime('December 25') < time()) $this->addSliderImage('NewYears.html',FALSE,FALSE,FALSE,TRUE);
+		elseif (strtotime('November 18') < time()) $this->addSliderImage('HappyHolidays.png',FALSE,FALSE,FALSE,TRUE);
 		
 	}
 	
