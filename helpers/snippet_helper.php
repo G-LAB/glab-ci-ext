@@ -146,6 +146,10 @@ function related ($title=FALSE, $number_of_items=FALSE) {
 	// Unset $title Argument
 	unset($active[0]);
 	
+	// Make Current Controller Unavailable
+	$controller = $CI->router->fetch_class();
+	if (isset($services[$controller])) unset($services[$controller]);
+	
 	// Check If Minimum Number of Items Is Requested
 	if (!is_numeric($number_of_items)) $number_of_items = 3;
 	if ($number_of_items > count($services)) $number_of_items = count($services);
