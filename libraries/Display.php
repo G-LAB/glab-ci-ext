@@ -70,7 +70,7 @@ class Display {
 			if (substr($this->viewBody,0,1) == '/') $this->viewBody = ltrim($this->viewBody,'/');
 			else $this->viewBody = controller_path().$this->viewBody;
 			
-			if (!file_exists(APPPATH.'views/'.$this->viewBody.'.php')) $main['body'] = 'Error loading '.$this->viewBody;
+			if (!file_exists(APPPATH.'views/'.$this->viewBody.'.php')) show_404('views/'.$this->viewBody);
 			else $main['body'] = $this->CI->load->view($this->viewBody,$this->viewBodyData,TRUE);
 		}
 		
@@ -80,7 +80,7 @@ class Display {
 			if (substr($this->viewSideLt,0,1) == '/') $this->viewSideLt = ltrim($this->viewSideLt,'/');
 			else $this->viewSideLt = controller_path().$this->viewSideLt;
 			
-			if (!file_exists(APPPATH.'views/'.$this->viewSideLt.'.php')) $main['side_lt'] = 'Error loading '.$this->viewSideLt;
+			if (!file_exists(APPPATH.'views/'.$this->viewSideLt.'.php')) show_404('views/'.$this->viewSideLt);
 			else $main['side_lt'] = $this->CI->load->view($this->viewSideLt,$this->viewSideLtData,TRUE);
 		}
 		
