@@ -2,14 +2,13 @@
 
 	function API_Request ($method, $url, $params=null, $username=null, $password=null, $packet=null, $cacheAge=0) {
 		
-		$dir = BASEPATH."cache/feedhelper/";
-		$fname = $dir.md5($url.serialize($params).$method);
+		$filePath = APPPATH."cache/apirequest_".md5($url.serialize($params).$method);
 		
 		// Make Cache Directory IF Does Not Exist
-		if (! is_dir($dir) ) mkdir($dir);
+		//if (!is_file($filePath)) touch($filePath);
 		
 		// Check for Cached File
-		if ( file_exists($fname) != TRUE || (time() - @filemtime($fname)) > $cacheAge  ) {
+		if ( file_exists($filePath) != TRUE || (time() - @filemtime($filePath)) > $cacheAge  ) {
 			
 			// GET NEW FILE
 			
@@ -39,8 +38,8 @@
 			curl_close($ch);
 			
 			// Save to Cache
-			file_put_contents($fname,$data);
-		} else $data = file_get_contents($fname);
+			file_put_contents($filePath,$data);
+		} else $data = file_get_contents($filePath);
 		
 		return $data;
 	}
