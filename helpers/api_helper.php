@@ -5,7 +5,7 @@
 		$filePath = APPPATH."cache/apirequest_".md5($url.serialize($params).$method);
 		
 		// Make Cache Directory IF Does Not Exist
-		//if (!is_file($filePath)) touch($filePath);
+		if (!is_file($filePath)) touch($filePath);
 		
 		// Check for Cached File
 		if ( file_exists($filePath) != TRUE || (time() - @filemtime($filePath)) > $cacheAge  ) {
