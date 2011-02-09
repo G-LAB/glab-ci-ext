@@ -8,20 +8,29 @@
 
 class Yubikey 
 {
-
+	
+	public $status;
+	
 	function validate ($ykid) {
 		$CI =& get_instance();
-		$CI->load->helper('api');
+		$CI->load->helper(array('api','array'));
 		
 		$params['id'] = 3468;
 		$params['otp'] = $ykid;
 		
+		$result['status'] = 'Server did not respond or response empty.';
 		$api = API_Request('GET','http://api.yubico.com/wsapi/verify',$params);
 		
-		preg_match('/status=([A-Z_]+)/', $api, $result);
+		foreach (explode("\n", $api) as $pair) if (preg_match('/([a-z]+)=/i', $pair, $chunk)) {
+				$key = $chunk[1];
+				$value = trim(substr($pair, strlen($key)+1));
+				$result[$key] = $value;
+		}
 		
-		if ($result[1] == 'OK') return true;
-		else return $result[1];
+		$this->status = element('status',$result);
+		
+		if (element('status',$result) == 'OK') return TRUE;
+		else return FALSE;
 	}
 	
 }
