@@ -4,13 +4,8 @@
 		
 		$filePath = APPPATH."cache/apirequest_".md5($url.serialize($params).$method);
 		
-		// Make Cache Directory IF Does Not Exist
-		if (!is_file($filePath)) touch($filePath);
-		
 		// Check for Cached File
 		if ( file_exists($filePath) != TRUE || (time() - @filemtime($filePath)) > $cacheAge  ) {
-			
-			// GET NEW FILE
 			
 			$ch = curl_init();
 					
@@ -37,8 +32,14 @@
 			$data = curl_exec($ch);
 			curl_close($ch);
 			
-			// Save to Cache
-			file_put_contents($filePath,$data);
+			if ($cacheAge) {
+				// Create Cache File if Doesn't Exist
+				if (!is_file($filePath)) touch($filePath);
+				
+				// Save to Cache
+				file_put_contents($filePath,$data);
+			}
+			
 		} else $data = file_get_contents($filePath);
 		
 		return $data;
