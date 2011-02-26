@@ -24,7 +24,7 @@ class GLAB_Exceptions extends CI_Exceptions {
 	
 	function __destruct () {
 		
-		if (count($this->errors) > 0) {
+		if (count($this->errors) > 0  && ENVIRONMENT == 'production') {
 		
 			$CI=&get_instance();
 			
@@ -51,7 +51,7 @@ class GLAB_Exceptions extends CI_Exceptions {
 	        $CI->email->print_debugger();
 		}
 			
-		parent::__destruct();
+		//parent::__destruct();
 		
 	}
 }
