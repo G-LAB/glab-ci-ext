@@ -9,6 +9,33 @@
 // ADDED support for secure cookies
 class GLAB_Input extends CI_Input { 
 	
+	function get ($str) {
+		
+		$ci_method = parent::get($str);
+		
+		if (!$ci_method) $glab_method = $this->qs($str);
+		
+		if ($glab_method === FALSE) return $ci_method;
+		else return $glab_method;
+	}
+	
+	function  qs ($str) {
+		
+		$qs = $this->server('REDIRECT_QUERY_STRING');
+		$qs = explode('&',$qs);
+		
+		foreach ($qs as $part) {
+			$part = explode('=',$part);
+			$key = $part[0];
+			if (isset($part[1])) $value = $part[1];
+			else return null;
+			
+			if ( $key == $str ) return urldecode($value);
+		}
+		
+		return FALSE;
+	}
+	
 	function cookie($index = '', $xss_clean = FALSE)
 	{
 		return $this->_fetch_from_array($_COOKIE, $index, $xss_clean);
