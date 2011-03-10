@@ -1,5 +1,8 @@
 <?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+/*
+	Convert paired values to associative array, using a value as the new key.
+*/
 function array_flatten ($array,$key1,$key2) { 
 	
 	if (!is_array($array)) return FALSE;
@@ -13,4 +16,13 @@ function array_flatten ($array,$key1,$key2) {
 	
 	return $newArray; 
 
+}
+
+/*
+	Get the first value from an array.
+*/
+function array_first ($array) {
+	
+	return array_shift(array_values($array));
+	
 }
