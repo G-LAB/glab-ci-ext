@@ -795,11 +795,11 @@
 			$this->url = $url;
 			
 			// Handle Cache
-			$dir = BASEPATH."cache/charts/";
+			$dir = APPPATH."cache/charts/";
 			
 			// Clean Up Cache - Remove After One Day
 			$cached_files = glob($dir.'*.png');
-			foreach ($cached_files as $file) if ((time() - @filemtime($file)) > 60*60*24) unlink($file);
+			if (is_array($cached_files)) foreach ($cached_files as $file) if ((time() - @filemtime($file)) > 60*60*24) unlink($file);
 			
 			if ($cache) {
 				// Process This Request Using Cache
