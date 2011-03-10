@@ -26,7 +26,6 @@ class Acl
 		//$whitelist[] = 'ajax';
 		$whitelist[] = 'cron';
 		$whitelist[] = 'pbx';
-		$whitelist[] = 'test';
 		$whitelist[] = 'cu3er';
 		
 		// Get EID of Current User
@@ -58,6 +57,7 @@ class Acl
 			foreach ($controllers as $controller) 
 				$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_'.basename($controller,EXT) ));
 				
+			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_domain_names' ));
 			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_web_hosting' ));
 			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_cortex' ));
 			
