@@ -56,6 +56,10 @@ class Data extends CI_Model {
 								
 	public $typeAddress = array('b'=>'Business',
 								'r'=>'Residential');
+			
+	function address () {
+		return $this->typeAddress;
+	}
 								
 	function months ($short=FALSE) {
 		if ($short) $list = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
