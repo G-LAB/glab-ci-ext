@@ -296,7 +296,7 @@ class Entity extends CI_Model {
 		if (isset($data['addr2'])) $insert['addr2'] = $data['addr2'];
 		$insert['city'] = $data['city'];
 		$insert['state'] = $data['state'];
-		$insert['zip5'] = $data['zip'];
+		$insert['zip5'] = $data['zip5'];
 		
 		if (isset($data['label'])) $insert['label'] = $data['label'];
 
