@@ -38,9 +38,9 @@ class Acl
 		// Run ACL Check
 		} else {
 			
-			require_once 'Zend/Acl.php';
-			require_once 'Zend/Acl/Role.php';
-			require_once 'Zend/Acl/Resource.php';
+			require_once '/var/www/vhosts/glabstudios.com/zend/Acl.php';
+			require_once '/var/www/vhosts/glabstudios.com/zend/Acl/Role.php';
+			require_once '/var/www/vhosts/glabstudios.com/zend/Acl/Resource.php';
 			
 			// Load Up Zend ACL
 			$this->acl = new Zend_Acl();
