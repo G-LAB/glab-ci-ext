@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require '/nfs/c06/h05/mnt/91576/data/lib/CI-Custom/libraries/S3.php';
+require 'S3.php';
 
 /**
  * G LAB Amazon S3 Backup Library for Code Igniter v2
@@ -94,7 +94,7 @@ class S3_Backup extends S3 {
 
 	private function getChildren ($data=array()) {
 		$output = array();
-		array_walk_recursive($data, create_function('$val, $key, $obj', 'array_push($obj, $val);'), &$output);
+		array_walk_recursive($data, create_function('$val, $key, $obj', 'array_push($obj, $val);'), $output);
 		return $output;
 	}
 
