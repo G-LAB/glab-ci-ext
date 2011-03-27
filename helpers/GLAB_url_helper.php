@@ -31,11 +31,11 @@ function controller_url () {
 
 }
 
-function assets_url ($asset_uri) {
+function assets_url ($asset_uri=null) {
 	
 	if (ENVIRONMENT != 'production') {
 		$base_url =  'https://glabassets.s3.amazonaws.com/';
-	else {
+	} else {
 		if ( isset($_SERVER['HTTPS']) ) $base_url = 'https://dbvnztzf4j5z6.cloudfront.net/';
 		else $base_url = 'http://assets.glabstudios.com/';
 	}
