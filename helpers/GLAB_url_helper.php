@@ -31,11 +31,16 @@ function controller_url () {
 
 }
 
-function assets_url () {
-	return 'https://glabassets.s3.amazonaws.com/';
+function assets_url ($asset_uri) {
 	
-	//if ( isset($_SERVER['HTTPS']) ) return 'https://dbvnztzf4j5z6.cloudfront.net/';
-	//else return 'http://assets.glabstudios.com/';
+	if (ENVIRONMENT != 'production') {
+		$base_url =  'https://glabassets.s3.amazonaws.com/';
+	else {
+		if ( isset($_SERVER['HTTPS']) ) $base_url = 'https://dbvnztzf4j5z6.cloudfront.net/';
+		else $base_url = 'http://assets.glabstudios.com/';
+	}
+	
+	return $base_url.$asset_uri;
 }
 
 // Overrides CI Function
