@@ -77,7 +77,7 @@ class Billingman extends CI_Model {
     				FROM (billing_orders_items i)
     				LEFT JOIN billing_invoices_items iv ON i.orimid = iv.orimid
     				LEFT JOIN billing_products_versions p ON i.skuvid = p.skuvid
-    				WHERE i.orid = 10000
+    				WHERE i.orid = $orid
     				GROUP BY i.orimid) AS data
     			";
     	
