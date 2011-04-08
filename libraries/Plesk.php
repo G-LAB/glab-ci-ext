@@ -3,226 +3,499 @@
 /**
  * G-LAB Plesk Library for Code Igniter v2
  * Written by Ryan Brodkin
- * Copyright 2010
+ * Copyright 2011
  */
 
 class Plesk 
 {
-	public $request;
-	public $request_xml;
-	public $response;
-	public $response_xml;
 	
-	private $errors;
+	private $xml;
+	private $packet;
 	
 	private $server;
 	
-	function setServer ($a_server) {
-		if (is_array($a_server)) $this->server = $a_server;
+	public $errors;
+	
+	function __construct() {
+		
+		$this->xml = new DOMDocument("1.0");
+		
+	}
+	
+	function init ($host, $username, $password) {
+		
+		if (func_num_args() == 3) {
+			$this->server['host'] = $host;
+			$this->server['username'] = $username;
+			$this->server['password'] = $password;
+		} else {
+			trigger_error('Host, Username, and Password are required.');
+		}
+	}
+	
+	function getCustomer ($client=null) {
+		
+		$root = $this->xml->createElement('customer');
+			
+			// GET
+			$get = $this->xml->createElement('get');
+			$root->appendChild($get);
+				
+				// FILTER
+				$filter = $this->xml->createElement('filter');
+				$get->appendChild($filter);
+				
+					// FILTER FIELD
+					if (is_numeric($client)) $filter_field = $this->xml->createElement('id');
+					elseif ($this->is_guid($client)) $filter_field = $this->xml->createElement('guid');
+					else $filter_field = $this->xml->createElement('login');
+					$filter_field_value = $this->xml->createTextNode($client);
+					$filter_field->appendChild($filter_field_value);
+					$filter->appendChild($filter_field);
+				
+				// DATASET
+				$dataset = $this->xml->createElement('dataset');
+				$get->appendChild($dataset);
+					
+					// GENERAL INFO
+					$gen_info = $this->xml->createElement('gen_info');
+					$dataset->appendChild($gen_info);
+		
+		$result = $this->_request($root);
+		
+		$output = array();
+		
+		foreach ($result as $id=>$row) {
+			$output = (array) $row->data->gen_info;
+			$output['id'] = (int) $row->id;
+		}
+		
+		return $output;
+		
+		
+	}
+	
+	function getCustomers ($client=null) {
+		
+		// INPUT MUST BE ARRAY
+		if (!is_array($client) && $client != null) $client = array($client);
+		
+		// CREATE ROOT ELEMENT
+		$root = $this->xml->createElement('customer');
+			
+			// ITERATE INPUT
+			foreach ($client as $value) {
+			
+				// GET
+				$get = $this->xml->createElement('get');
+				$root->appendChild($get);
+					
+					// FILTER
+					$filter = $this->xml->createElement('filter');
+					$get->appendChild($filter);
+					
+						// FILTER FIELDS
+						if ($client != null) {
+							if ($this->is_guid($value)) $filter_field = $this->xml->createElement('guid');
+							else $filter_field = $this->xml->createElement('login');
+							$filter_field_value = $this->xml->createTextNode($value);
+							$filter_field->appendChild($filter_field_value);
+							$filter->appendChild($filter_field);
+						}
+					
+					// DATASET
+					$dataset = $this->xml->createElement('dataset');
+					$get->appendChild($dataset);
+						
+						// GENERAL INFO
+						$gen_info = $this->xml->createElement('gen_info');
+						$dataset->appendChild($gen_info);
+			} // FOREACH
+		
+		$result = $this->_request($root);
+		
+		$output = array();
+		
+		foreach ($result as $row) {
+			$guid = (string) $row->data->gen_info->guid;
+			
+			$output[$guid] = (array) $row->data->gen_info;
+			$output[$guid]['id'] = (int) $row->id;
+		}
+		
+		return $output;
+		
+	}
+	
+	function getServer () {
+		
+		$datasets = array('key','gen_info','components','stat','interfaces','services_state');
+		
+		$root = $this->xml->createElement('server');
+			
+			// GET
+			$get = $this->xml->createElement('get');
+			$root->appendChild($get);
+			
+				// DATA SETS
+				foreach ($datasets as $set) {
+					$set_element = $this->xml->createElement($set);
+					$get->appendChild($set_element);
+				}
+				
+		
+		$result = $this->_request($root);
+		$result = $result[0];
+		
+		$output = array();
+		foreach ($datasets as $set) {
+			
+			if ($set == 'key') {
+				$output['key'] = $this->key_value_pairs($result->key->property);
+			} elseif ($set == 'gen_info') {
+				$output['gen_info'] = (array) $result->gen_info;
+				unset($output['gen_info']['vps-optimized-status']);
+				
+			} elseif ($set == 'components') {
+				$output['components'] = $this->key_value_pairs($result->components->component,'name','version');
+				
+			} elseif ($set == 'stat') {
+				foreach ((array) $result->stat as $key=>$object) $output['stat'][$key] = (array) $object;
+				$output['stat']['diskspace'] = (array) $result->stat->diskspace->device;
+				
+				
+			} elseif ($set == 'services_state') {
+				//$output['services_state'] = (array) $result->services_state;
+				foreach ((array) $result->services_state->xpath('//srv') as $object) $output['services_state'][] = (array) $object;
+				
+			} else $output[$set] = (array) $result->$set;
+			
+		}
+		
+		return $output;
+			
+	}
+	
+	function getSubscription($domain) {
+		
+		$datasets = array('gen_info','hosting','limits','stat','prefs','disk_usage','performance','subscriptions','permissions');
+		
+		$root = $this->xml->createElement('webspace');
+			
+			// GET
+			$get = $this->xml->createElement('get');
+			$root->appendChild($get);
+				
+				// FILTER
+				$filter = $this->xml->createElement('filter');
+				$get->appendChild($filter);
+				
+					// FILTER FIELD
+					if (is_numeric($domain)) $filter_field = $this->xml->createElement('id');
+					elseif ($this->is_guid($domain)) $filter_field = $this->xml->createElement('guid');
+					else $filter_field = $this->xml->createElement('name');
+					$filter_field_value = $this->xml->createTextNode($domain);
+					$filter_field->appendChild($filter_field_value);
+					$filter->appendChild($filter_field);
+				
+				// DATASET
+				$dataset = $this->xml->createElement('dataset');
+				$get->appendChild($dataset);
+					
+					// DATA SETS
+					foreach ($datasets as $set) {
+						$set_element = $this->xml->createElement($set);
+						$dataset->appendChild($set_element);
+					}
+		
+		$result = $this->_request($root);
+		
+		$output = array();
+		
+		foreach ((array) $result[0]->data as $dataset=>$object) { 
+			
+			if ($dataset == 'hosting') {
+				$output['hosting'] = $this->key_value_pairs($object->vrt_hst->property);
+				$output['hosting']['ip_address'] = (string) $object->vrt_hst->ip_address;
+			} elseif ($dataset == 'limits') { 
+				$output['limits'] = $this->key_value_pairs($object->limit);
+				$output['limits']['overuse'] = (string) $object->overuse;
+			} elseif ($dataset == 'permissions') { 
+				$output['permissions'] = $this->key_value_pairs($object->permission);
+			} else $output["$dataset"] = (array) $object;
+		}
+		
+		return $output;
+		
+	}
+	
+	function getSubscriptions($client=null) {
+		
+		// INPUT MUST BE ARRAY
+		if (!is_array($client)) $client = array($client);
+		
+		// CREATE ROOT ELEMENT		
+		$root = $this->xml->createElement('webspace');
+			
+			foreach ($client as $value) {
+				
+				// GET
+				$get = $this->xml->createElement('get');
+				$root->appendChild($get);
+					
+					// FILTER
+					$filter = $this->xml->createElement('filter');
+					$get->appendChild($filter);
+					
+						// FILTER FIELD
+						if ($client != null) { 
+							if ($this->is_guid($value)) $filter_field = $this->xml->createElement('owner-guid');
+							else $filter_field = $this->xml->createElement('owner-login');
+							$filter_field_value = $this->xml->createTextNode($value);
+							$filter_field->appendChild($filter_field_value);
+							$filter->appendChild($filter_field);
+						}
+					
+					// DATASET
+					$dataset = $this->xml->createElement('dataset');
+					$get->appendChild($dataset);
+						
+						// HOSTING
+						$hosting = $this->xml->createElement('hosting');
+						$hosting_value = $this->xml->createTextNode('');
+						$hosting->appendChild($hosting_value);
+						$dataset->appendChild($hosting);
+						
+			} // FOREACH
+		
+		$result = $this->_request($root);
+		
+		$output = array();
+		
+		foreach ($result as $id=>$row) {
+			$output[$id] = (array) $row->data->gen_info;
+			$output[$id]['features'] = $this->key_value_pairs($row->data->hosting->vrt_hst->property);
+		}
+		
+		return $output;
+		
+	}
+	
+	function updateCustomerPassword ($customer, $password) {
+		
+		$root = $this->xml->createElement('customer');
+			
+			// GET
+			$set = $this->xml->createElement('set');
+			$root->appendChild($set);
+				
+				// FILTER
+				$filter = $this->xml->createElement('filter');
+				$set->appendChild($filter);
+				
+					// FILTER FIELD
+					if (is_numeric($customer)) $filter_field = $this->xml->createElement('id');
+					elseif ($this->is_guid($customer)) $filter_field = $this->xml->createElement('guid');
+					else $filter_field = $this->xml->createElement('login');
+					$filter_field_value = $this->xml->createTextNode($customer);
+					$filter_field->appendChild($filter_field_value);
+					$filter->appendChild($filter_field);
+				
+				// VALUES
+				$values = $this->xml->createElement('values');
+				$set->appendChild($values);
+					
+					// HOSTING
+					$gen_info = $this->xml->createElement('gen_info');
+					$values->appendChild($gen_info);
+						
+						// VALUE
+						$passwd = $this->xml->createElement('passwd');
+						$passwd_value = $this->xml->createTextNode($password);
+						$passwd->appendChild($passwd_value);
+						$gen_info->appendChild($passwd);
+		
+		$result = $this->_request($root);
+		
+		if (!isset($result->system->errcode)) return true;
+		else return false;
+	}
+	
+	function updateSubscriptionPassword ($domain, $ip_address, $password) {
+		
+		$root = $this->xml->createElement('webspace');
+			
+			// GET
+			$set = $this->xml->createElement('set');
+			$root->appendChild($set);
+				
+				// FILTER
+				$filter = $this->xml->createElement('filter');
+				$set->appendChild($filter);
+				
+					// FILTER FIELD
+					if (is_numeric($domain)) $filter_field = $this->xml->createElement('id');
+					elseif ($this->is_guid($domain)) $filter_field = $this->xml->createElement('guid');
+					else $filter_field = $this->xml->createElement('name');
+					$filter_field_value = $this->xml->createTextNode($domain);
+					$filter_field->appendChild($filter_field_value);
+					$filter->appendChild($filter_field);
+				
+				// VALUES
+				$values = $this->xml->createElement('values');
+				$set->appendChild($values);
+					
+					// HOSTING
+					$hosting = $this->xml->createElement('hosting');
+					$values->appendChild($hosting);
+					
+						// VIRTUAL HOST
+						$vrt_hst = $this->xml->createElement('vrt_hst');
+						$hosting->appendChild($vrt_hst);
+						
+							// PROPERTY
+							$property = $this->xml->createElement('property');
+							$vrt_hst->appendChild($property);
+							
+								// NAME
+								$name = $this->xml->createElement('name');
+								$name_value = $this->xml->createTextNode('ftp_password');
+								$name->appendChild($name_value);
+								$property->appendChild($name);
+								
+								// VALUE
+								$value = $this->xml->createElement('value');
+								$value_value = $this->xml->createTextNode($password);
+								$value->appendChild($value_value);
+								$property->appendChild($value);
+								
+							// IP ADDRESS
+							$ip = $this->xml->createElement('ip_address');
+							$ip_value = $this->xml->createTextNode($ip_address);
+							$ip->appendChild($ip_value);
+							$vrt_hst->appendChild($ip);
+		
+		$result = $this->_request($root);
+		
+		if (!isset($result->system->errcode)) return true;
+		else return false;
+		
+	}
+	
+	function controlService ($service,$action='restart') {
+		
+		if (!is_array($service)) $service = array($service);
+		
+		$root = $this->xml->createElement('server');
+			
+			foreach ($service as $srv_id) {
+			
+			// SRV MAN
+			$srv_man = $this->xml->createElement('srv_man');
+			$root->appendChild($srv_man);
+				
+				// ID
+				$id = $this->xml->createElement('id');
+				$id_value = $this->xml->createTextNode($srv_id);
+				$id->appendChild($id_value);
+				$srv_man->appendChild($id);
+				
+				// OPERATION
+				$operation = $this->xml->createElement('operation');
+				$operation_value = $this->xml->createTextNode($action);
+				$operation->appendChild($operation_value);
+				$srv_man->appendChild($operation);
+				
+			}
+		
+		$result = $this->_request($root);
+
 		return TRUE;
+		
 	}
 	
-	function getUser ($pcid) {
-		$data['client']['get']['filter']['id'] = $pcid;
-		$data['client']['get']['dataset']['gen_info'] = null;
-		$data['client']['get']['dataset']['stat'] = null;
-		$data['client']['get']['dataset']['permissions'] = null;
-		$data['client']['get']['dataset']['limits'] = null;
-		$data['client']['get']['dataset']['ippool'] = null;
+	private function key_value_pairs ($obj,$key='name',$value='value') {
 		
-		$this->_request($data);
+		if (!is_object($obj)) return array();
 		
-		$response = $this->response;
+		$output = array();
 		
-		if ($response->client->get->result->status == 'ok') return $response->client->get->result->data;
-		else return FALSE;
+		foreach ($obj as $row) $output[(string) $row->$key] = (string) $row->$value;
+		
+		return $output;
 	}
 	
-	function getDomains ($pcid) {
-		$data['domain']['get']['filter']['client_id'] = $pcid;
-		$data['domain']['get']['dataset']['hosting'] = null;
-		$data['domain']['get']['dataset']['limits'] = null;
-		$data['domain']['get']['dataset']['stat'] = null;
-		$data['domain']['get']['dataset']['prefs'] = null;
-		$data['domain']['get']['dataset']['user'] = null;
-		$data['domain']['get']['dataset']['performance'] = null;
+	private function is_guid ($str) {
 		
-		$this->_request($data);
+		return preg_match("/^(\{)?[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}(?(1)\})$/i", $str);
 		
-		$response = $this->response;
-		
-		if (isset($response->system->status)) return FALSE;
-		else return $response->domain->get->xpath('//result/data');
 	}
 	
-	function getDomain ($domain) {
-		$data['domain']['get']['filter']['domain_name'] = $domain;
-		$data['domain']['get']['dataset']['hosting'] = null;
+	private function array_first ($array) {
 		
-		$this->_request($data);
+		return array_shift(array_values($array));
 		
-		$response = $this->response;
-		
-		if (isset($response->system->status)) return FALSE;
-		else return $response->domain->get->result->data;
 	}
 	
-	private function _passGenerate ($eid,$domain) {
-		$CI =& get_instance();
-		$CI->load->helper('security');
+	private function _request($obj) {
 		
-		$entity = $CI->entity->get($eid);
-		return substr(dohash($entity['eid'].$entity['acctnum'].$domain),-15,8);
-	}
-	
-	function passFtpReset ($domain) {
+		// Generate Base Tree
+		$packet = $this->xml->createElement("packet");
+		$packet_version = $this->xml->createAttribute('version');
+		$packet_version_text = $this->xml->createTextNode('1.6.3.1');
+		$packet_version->appendChild($packet_version_text);
+		$packet->appendChild($packet_version);
 		
-		$CI =& get_instance();
-		$plesk = $this->getDomain($domain);
+		// Add Method Data to Tree
+		$packet->appendChild($obj);
 		
-		$CI->db->join('entities e','e.eid=h.eid','left');
-		$q = $CI->db->get_where('host_clients h','h.pcid = '.$plesk->gen_info->client_id);
-		$client = $q->row_array();
+		// Add Everything to DOM
+		$this->xml->appendChild($packet);
 		
-		if (isset($client['eid'])) $pass = $this->_passGenerate($client['eid'],$domain);
-		
-		$data['domain']['set']['filter']['domain_name'] = $domain;
-		$data['domain']['set']['values']['hosting']['vrt_hst']['property']['name'] = 'ftp_password';
-		$data['domain']['set']['values']['hosting']['vrt_hst']['property']['value'] = $pass;
-		$data['domain']['set']['values']['hosting']['vrt_hst']['ip_address'] = "72.47.197.18";
-		
-		if ($this->_request($data,"1.5.0.0")) return $pass;
-		else return FALSE;
-	}
-	
-	function addClient ($psid,$eid) {
-		$CI =& get_instance();
-		$entity = $CI->entity->get($eid);
-		
-		$client['pname'] = $entity['name'];
-		$client['cname'] = acctnum_format($entity['acctnum']);
-		$client['login'] = $entity['acctnum'];
-		$client['passwd'] = $this->_passGenerate($eid,'plesk');
-		
-		return $this->_addPClient($client);
-	}
-	
-	private function _setError ($str) {
-		$this->errors[] = "$str";
-	}
-	
-	private function _addPClient ($input=array()) {
-		$data = array();
-		foreach ($input as $key=>$value) $data['client']['add']['gen_info'][$key] = $value;
-		$data['client']['add']['template-name'] = 'G LAB Client';
-		
-		$result = $this->_request($data);
-		$result = simplexml_load_string($result);
-		
-		if ($result->client->add->result->status == 'error') {
-			$this->_setError($result->client->add->result->errtext);
-			return FALSE;
-		} 
-		elseif ($result->client->add->result->status == 'ok') return $result->client->add->result->id;
-	}
-	
-	private function _request ($data=array(),$version="1.4.2.0") {
-		$CI =& get_instance();
-		
-		$host = $this->server['ip_address'];
-		$port = 8443;
-		$path = 'enterprise/control/agent.php';
-		
-		$url = 'https://' . $host . ':' . $port . '/' . $path;
-		
-		$headers = array(
-		      'HTTP_AUTH_LOGIN: '.$this->server['auth_user'],
-		      'HTTP_AUTH_PASSWD: '.$this->server['auth_pass'],
-			'Content-Type: text/xml'
-		);
-		
-		// initialize the curl engine
-		$ch = curl_init();
-		 
-		// set the curl options:
-		 
-		// do not check the name of SSL certificate of the remote server
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		 
-		// do not check up the remote server certificate
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		 
-		// pass in the header elements
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		 
-		// pass in the url of the target server
-		curl_setopt($ch, CURLOPT_URL, $url);
-		
-		// tell CURL to return the result rather than to load it to the browser
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		 
-		$packet = $this->_array2xml($data, 'packet', null, $version);
+		// Generate XML
+		$packet = $this->xml->saveXML();
+		/*$packet='<?xml version="1.0"?><packet version="1.4.2.0"><domain><get><filter><client_id>1</client_id></filter><dataset><hosting></hosting></dataset></get></domain></packet>';*/
+		// Store Request for Debugging
 		$this->request_xml = $packet;
 		$this->request = simplexml_load_string($packet);
 		
-		// pass in the packet to deliver
+		$port = 8443;
+		$path = 'enterprise/control/agent.php';
+		$url = 'https://' . $this->server['host'] . ':' . $port . '/' . $path;
+		
+		$headers = array(
+			'HTTP_AUTH_LOGIN: '.$this->server['username'],
+			'HTTP_AUTH_PASSWD: '.$this->server['password'],
+			'Content-Type: text/xml'
+		);
+		
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $packet);
-		 
-		// perform the CURL request and return the result
 		$result = curl_exec($ch);
 		
 		$this->response = simplexml_load_string($result);
-		 
-		// close the CURL session
+		$this->response_xml = $result;
+		
 		curl_close($ch);
 		
-		return $result;
-	}
-	
-	private function _array2xml($data, $rootNodeName = 'packet', $xml=null, $version) {
+		// Extract Results Tree
+		$results = $this->response->xpath('//result');
 		
+		// Clear DOM
+		$this->__construct();
 		
-		// turn off compatibility mode as simple xml throws a wobbly if you don't.
-		if (ini_get('zend.ze1_compatibility_mode') == 1)
-		{
-			ini_set ('zend.ze1_compatibility_mode', 0);
+		if (isset( $this->response->system )) {
+			$this->errors[] = $this->response->system;
+			return FALSE;
+		} else {
+			return $results;
 		}
 		
-		if ($xml == null)
-		{
-			$xml = simplexml_load_string("<?xml version='1.0' encoding='utf-8'?>\n<$rootNodeName version=\"$version\"/>\n");
-		}
-		
-		// loop through the data passed in.
-		foreach($data as $key => $value)
-		{
-			// no numeric keys in our xml please!
-			if (is_numeric($key))
-			{
-				// make string key...
-				$key = "unknownNode_". (string) $key;
-			}
-			
-			// replace anything not alpha numeric
-			$key = preg_replace('/[^a-z_\-]/i', '', $key);
-			
-			// if there is another array found recrusively call this function
-			if (is_array($value))
-			{
-				$node = $xml->addChild($key);
-				// recrusive call.
-				$this->_array2xml($value, $rootNodeName, $node, $xml, $version);
-			}
-			else 
-			{
-				// add single node.
-                                $value = htmlentities($value);
-				$xml->addChild($key,$value);
-			}
-			
-		}
-		// pass back as string. or simple xml object if you want!
-		return $xml->asXML();
 	}
 	
 }
