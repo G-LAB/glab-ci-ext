@@ -74,6 +74,15 @@ class Entity extends CI_Model {
 		return $CI->session->userdata('eid');
 	}
 	
+	function getEidByAcctnum ($acctnum) {
+		
+		$data = $this->db	->where('acctnum', $acctnum)
+							->get('entities')
+							->row_array();
+		
+		return element('eid', $data);
+	}
+	
 	function getEidByEmail ($email) {
 		
 		$q = $this->db->query('SELECT eid FROM emailbook WHERE email = "'.$email.'" LIMIT 1');
