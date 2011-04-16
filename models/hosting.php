@@ -24,23 +24,33 @@ class Hosting extends CI_Model {
 		
 	}
 	
-	function updatePasswordCustomer ($psid,$pcid,$password=false) {
+	function updatePasswordCustomer ($psid, $eid, $password=false) {
 		
-		if (!$password) $password = $this->genPass();
+		$pcid = $this->getPcid($psid, $eid);
 		
-		$customer_data = $this->getCustomer($psid, $pcid);
+		if ($pcid) {
 		
-		if (!$customer_data) return false;
+			if (!$password) $password = $this->genPass();
+			
+			$customer_data = $this->getCustomer($psid, $eid);
+			
+			if (!$customer_data) return false;
+			
+			$reset['username'] = $customer_data['login'];
+			$reset['password'] = $password;
+			$reset['success'] = $this->plesk->updateCustomerPassword($pcid,$password);
+			
+			if ($reset['success']) {
+				$reset['email'] = $this->notification->email('client/hosting_resetpassword_customer', $reset, $eid);
+				return $reset;
+			
+			} else {
+				return false;
+			}
 		
-		$reset['username'] = $customer_data['login'];
-		$reset['password'] = $password;
-		$reset['success'] = $this->plesk->updateCustomerPassword($pcid,$password);
-		
-		if ($reset['success']) {
-			$reset['email'] = $this->notification->email('client/hosting_resetpassword_customer',$reset,1);
-			return $reset;
+		} else {
+			return false;
 		}
-		else return false;
 		
 	}
 	
@@ -65,12 +75,15 @@ class Hosting extends CI_Model {
 		
 	}
 	
-	function getCustomer ($psid, $pcid) {
+	function getCustomer ($psid, $eid) {
 		
 		// Set API Server
 		$this->setServer($psid);
 		
-		return $this->plesk->getCustomer($pcid);
+		$pcid = $this->getPcid($psid, $eid);
+		
+		if ($pcid) return $this->plesk->getCustomer($pcid);
+		else return false;
 		
 	}
 	
@@ -84,7 +97,7 @@ class Hosting extends CI_Model {
 		
 		// Get Clients
 		$this->db->limit(5,$offset);
-		$this->db->select('e.acctnum, e.eid');
+		$this->db->select('CONCAT("a",e.acctnum) as acctnum, e.eid');
 		$this->db->where('psid',$psid);
 		$this->db->join('entities e','e.eid = hc.eid');
 		$this->db->order_by('CONCAT(companyName,e.firstName," ",e.lastName)');
@@ -101,6 +114,7 @@ class Hosting extends CI_Model {
 			$eid = current($r);
 			next($r);
 			
+			$current['eid'] = $eid;
 			$current['name'] = $this->entity->getValue('name',$eid);
 			
 			$data[$pcid] = array_merge($current, $customer);
@@ -117,16 +131,31 @@ class Hosting extends CI_Model {
 		if ($psid == '*') {
 			foreach ($this->getPsids() as $psid) {
 				$result = $this->getDomain($psid,$domain);
-				if (isset($result['gen_info'])) return array_merge($result,array('psid'=>$psid));
+				if ($result) return $result;
 			}
-			
+		
+		// Single Domain Result (Referenced Above)
 		} else {
 			// Set API Server
 			$this->setServer($psid);
 			
-			return $this->plesk->getSubscription($domain);
+			$data = $this->plesk->getSubscription($domain);
+			
+			// Return
+			if (isset($data['gen_info'])) {
+				return array_merge(	$data, 
+									array(	
+										'psid'=>$psid, 
+										'eid'=>$this->getEid($psid, $data['gen_info']['owner-id'])
+									) 
+				);
+				
+			} else {
+				return false;
+			}
 		}
 		
+
 	}
 	
 	function getDomains ($psid,$eid=null,$offset=0) {
@@ -169,15 +198,27 @@ class Hosting extends CI_Model {
 		return $this->plesk->controlService($services,$action);
 	}
 	
-	function getPcid ($eid) {
-		$this->db->where('eid',$eid);
-		$this->db->limit(1);
-		$q = $this->db->get('host_clients');
-		$r = $q->row_array();
+	function getPcid ($psid, $eid) {
 		
-		$this->setServer($r['psid']);
+		// Set API Server
+		$this->setServer($psid);
 		
-		return $r['pcid'];
+		$acctnum = $this->entity->getValue('acctnum', $eid);
+		
+		$data = $this->plesk->getCustomer('a'.$acctnum);
+		
+		return element('id', $data);
+	}
+	
+	function getEid ($psid, $pcid) {
+		
+		// Set API Server
+		$this->setServer($psid);
+		
+		$data = $this->plesk->getCustomer($pcid);
+		
+		return $this->entity->getEidByAcctnum(substr($data['login'], 1));
+		
 	}
 	
 	private function getPsids () {
