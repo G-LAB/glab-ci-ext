@@ -24,6 +24,10 @@ class Agreement extends CI_Model {
 		return $q->row_array();
 	}
 	
+	function getRequest ($key) {
+		return $this->db->where('guid',$key)->get('agreements_requests')->row_array();
+	}
+	
 	function getRevisions ($agid) {
 		$this->db->limit(50);
 		$this->db->order_by('agrvid','DESC');
@@ -55,6 +59,27 @@ class Agreement extends CI_Model {
 		
 		$this->db->insert('agreements_revs');
 		return $this->db->insert_id();
+	}
+	
+	function sign ($key, $agrvid, $signature) {
+		
+		$this->db->trans_start();
+		
+		$request = $this->getRequest($key);
+		
+		$this->db->set('agrvid',$agrvid);
+		$this->db->set('signature',$signature);
+		$this->db->set('eid',$request['eid']);
+		$this->db->set('peid',$request['peid']);
+		
+		$this->db->insert('agreements_signatures');
+		
+		$this->db->delete('agreements_requests', array('guid'=>$key));
+		
+		$this->db->trans_complete();
+		
+		if ($this->db->trans_status()) return true;
+		else return false;
 	}
 
 }
