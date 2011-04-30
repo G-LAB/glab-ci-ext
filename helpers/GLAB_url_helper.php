@@ -51,6 +51,6 @@ function site_url($uri = '',$secure=FALSE) {
 }
 
 function company_url ($uri) {
-	if (preg_match("/staging/", $_SERVER['SERVER_NAME'])) return 'http://staging.glabstudios.com/'.$uri;
+	if (preg_match("/glabdev.net/", $_SERVER['SERVER_NAME'])) return site_url($uri);
 	else return 'http://glabstudios.com/'.$uri;
 }
