@@ -181,8 +181,13 @@ class Hosting extends CI_Model {
 	
 	function getServerProfile ($psid) {
 			
+			$this->load->library('MediaTemple');
+			
 			// Set API Server, Returns DB Entry
 			$data['profile'] = $this->setServer($psid);
+			
+			// Tack on Media Temple Profile
+			$data['mt'] = $this->mediatemple->get_service($data['profile']['mt_svc']);
 			
 			// Get Profile From Plesk
 			$plesk = $this->plesk->getServer();
