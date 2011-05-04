@@ -298,6 +298,19 @@ class Entity extends CI_Model {
 	
 	function addAddress($eid,$data) {
 		
+		if (isset($data['zip']) && strlen($data['zip']) == 10) {
+			$zip = explode('-',$data['zip']);
+			$data['zip5'] = $zip[0];
+			if (isset($zip[1])) $data['zip4'] = $zip[1];
+			
+		} elseif (isset($data['zip']) && strlen($data['zip']) == 9) {
+			$data['zip5'] = substr($data['zip'], 0, 5);
+			$data['zip4'] = substr($data['zip'], 5, 4);
+			
+		} elseif (isset($data['zip'])) {
+			$data['zip5'] = substr($data['zip'], 0, 5);
+		}
+		
 		$insert['eid'] = $eid;
 		$insert['type'] = $data['type'];
 		
@@ -306,6 +319,7 @@ class Entity extends CI_Model {
 		$insert['city'] = $data['city'];
 		$insert['state'] = $data['state'];
 		$insert['zip5'] = $data['zip5'];
+		if (isset($data['zip4'])) $insert['zip4'] = $data['zip4'];
 		
 		if (isset($data['label'])) $insert['label'] = $data['label'];
 
