@@ -38,4 +38,22 @@ class GLAB_Loader extends CI_Loader {
 		} else return FALSE;
 	}
 	
+	function pdf ($viewfile, $data=array(), $output='download.pdf', $is_letter=true, $is_portrait=true) {
+		
+		require_once($_SERVER['PATH_LIB']."/dompdf/dompdf_config.inc.php");
+		
+		if ($is_letter) $paper = 'letter';
+		else $paper = 'legal';
+		
+		if ($is_portrait) $orientation = 'portrait';
+		else $orientation = 'landscape';
+		
+		$dompdf = new DOMPDF();
+		$dompdf->load_html($this->view($viewfile, $data, true));
+		$dompdf->set_paper($paper, $orientation);
+		$dompdf->render();
+		
+		$dompdf->stream("$output", array("Attachment" => false));
+	}
+	
 }

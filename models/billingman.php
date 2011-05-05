@@ -7,6 +7,10 @@ class Billingman extends CI_Model {
 		$this->load->model('accounting');
 	}
 	
+	function getEstimates($orid) {
+		return $this->db->get_where('billing_estimates','orid = '.$orid)->result_array();
+	}
+	
 	function getInvoices() {
 	    $this->db->select("*, (subtotal + tax) as total, (SELECT COUNT(*) FROM billing_invoices_items WHERE ivid = billing_invoices.ivid) as countItems",FALSE);
 	    $query = $this->db->get('billing_invoices');
@@ -62,8 +66,13 @@ class Billingman extends CI_Model {
 		return $query->row_array();
 	}
     
-    function getOrders() {
+    function getOrders($status=false) {
+        
+        if ($status) $this->db->where('status',$status);
+        else $this->db->where('status !=','cancelled');
+        
         $query = $this->db->get('billing_orders');
+        
         return $query->result_array();
     }
     

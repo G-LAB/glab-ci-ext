@@ -84,19 +84,19 @@ class Data extends CI_Model {
 		else return $data;
 	}
 	
-	function orderStatus($key=null) {
+	function orderStatus() {
 		
 		$this->load->helper('array');
 		
-		$data[0] = "Cancelled";
-		$data[1] = "Active";
-		$data[2] = "Complete";
-		$data[3] = "Fraud Screening";
-		$data[4] = "Payment Pending";
-		$data[5] = "In Progress";
-		
-		if ($key != null) return element($key,$data);
-		else return $data;
+		$data['cancelled'] = "Cancelled";
+		$data['active'] = "Active";
+		$data['complete'] = "Complete";
+		$data['fraud_hold'] = "Fraud Hold";
+		$data['payment_hold'] = "Payment Hold";
+		$data['estimate'] = "Estimate";
+
+		asort($data);
+		return $data;
 		
 	}
 
