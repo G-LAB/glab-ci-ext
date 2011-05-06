@@ -16,7 +16,7 @@ class S3_Backup extends S3 {
 		
 		parent::__construct();
 		
-		$this->setAuth('AKIAJLYGZJSNFJEAGSSA','R0gFPVPW3C8Ce3bbI490K57xLqEpQF1NKy1DW6gr');
+		$this->setAuth($this->config->item('auth_aws_key_access'), $this->config->item('auth_aws_key_secret'));
 	}
 	
 	function create ($localpath,$remotepath) {
