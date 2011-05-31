@@ -18,7 +18,7 @@ class SSO_Controller extends CI_Controller {
 		$this->CI->load->library('session');
 		$this->CI->load->library('SSO_Lib');
 		
-		if (method_exists($this->display, 'disable')) $this->display->disable();
+		if (isset($this->display)) $this->display->disable();
 	}
 	
 	function index () {
