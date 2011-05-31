@@ -17,6 +17,8 @@ class SSO_Controller extends CI_Controller {
 		
 		$this->CI->load->library('session');
 		$this->CI->load->library('SSO_Lib');
+		
+		if (method_exists($this->display, 'disable')) $this->display->disable();
 	}
 	
 	function index () {
@@ -24,8 +26,6 @@ class SSO_Controller extends CI_Controller {
 	}
 	
 	function login () {
-		
-		$this->display->disable();
 		
 		$this->load->library('user_agent');
 		if ($this->sso_lib->isAuthenticated()) redirect($this->agent->referrer());
@@ -42,8 +42,6 @@ class SSO_Controller extends CI_Controller {
 	}
 	
 	function validate ($token=FALSE) {
-		
-		if (method_exists($this->display, 'disable')) $this->display->disable();
 		
 		// Validate Token Locally
 		$entity = $this->sso_lib->validate($token);
