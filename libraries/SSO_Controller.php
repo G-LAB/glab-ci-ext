@@ -8,8 +8,15 @@
 
 class SSO_Controller extends CI_Controller { 
 	
+	private $CI;
+	
 	function __construct () {
 		parent::__construct();
+		
+		$this->CI =& get_instance();
+		
+		$this->CI->load->library('session');
+		$this->CI->load->library('SSO_Lib');
 	}
 	
 	function index () {
@@ -36,7 +43,7 @@ class SSO_Controller extends CI_Controller {
 	
 	function validate ($token=FALSE) {
 		
-		$this->display->disable();
+		if (method_exists($this->display, 'disable')) $this->display->disable();
 		
 		// Validate Token Locally
 		$entity = $this->sso_lib->validate($token);
