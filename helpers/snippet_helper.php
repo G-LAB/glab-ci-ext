@@ -212,11 +212,3 @@ function related ($title=FALSE, $number_of_items=FALSE) {
 	}
 	echo '</div>';
 }
-
-function feature_message ($ryan=TRUE) {
-	$CI =& get_instance();
-	$CI->load->helper('typography');
-	$msg = "This feature is currently unavailable.";
-	if ($ryan) $msg.= "\nContact Ryan at extension 101 and he can adjust this manually.";
-	return auto_typography($msg);
-}
