@@ -7,8 +7,90 @@ class Billingman extends CI_Model {
 		$this->load->model('accounting');
 	}
 	
+	function getBatchErrorCount() {
+		return array_sum($this->getBatchErrorCountsByGateway());
+	}
+	
+	function getBatchErrorCountsByGateway () {
+		
+		$counts = array();
+		
+		foreach ($this->getGatewayInstances() as $pgid=>$instance) {
+			if (method_exists($instance, 'get_batch_errors')) $counts[$pgid] = count($instance->get_batch_errors());
+		}
+		
+		return $counts;
+	}
+	
+	function getBatchErrorsByGateway () {
+		
+		$errors = array();
+		
+		foreach ($this->getGatewayInstances() as $pgid=>$instance) {
+			if (method_exists($instance, 'get_batch_errors')) $errors[$pgid] = $instance->get_batch_errors();
+		}
+		
+		return $errors;
+	}
+	
+	function getBatchErrors ($pgid) {
+		return $this->getGatewayInstance($pgid)->get_batch_errors();
+	}
+	
 	function getEstimates($orid) {
 		return $this->db->get_where('billing_estimates','orid = '.$orid)->result_array();
+	}
+	
+	function getGateway ($pgid) {
+		return $this->db->get_where('billing_paygateway', array('pgid'=>$pgid))->row_array();
+	}
+	
+	function getGateways ($show_disabled=false) {
+		
+		// Hide Disabled Gateways
+		if (!$show_disabled) $this->db->where('status', '1');
+		
+		$results = $this->db->get('billing_paygateway')->result_array();
+		
+		foreach ($results as $row) {
+			$data[$row['pgid']] = $row;
+		}
+		
+		return $data;
+	}
+	
+	function getGatewayInstance ($gateway) {
+		
+		if (is_numeric($gateway)) $data = $this->getGateway($gateway);
+		elseif (is_array($gateway)) $data = $gateway;
+		else exit('Method getGatewayInstance() only accepts pgid or array.');
+		
+		if (isset($data, $data['library'])) {
+			$class = 'Gateway'.ucwords($data['library']);
+			
+			if (file_exists(APPPATH.'/libraries/'.$class.'.php')) {
+				require_once APPPATH.'/libraries/'.$class.'.php';
+				$instance = new $class ($data);
+				return $instance;
+				
+			} else {
+				log_message('debug', 'Could not locate '.$class.' class.');
+			}
+			
+		} else {
+			show_error('No such gateway.');
+		}
+	}
+	
+	function getGatewayInstances ($show_disabled=true) {
+		$data = $this->getGateways($show_disabled);
+		
+		$instances = array();
+		foreach ($data as $pgid=>$gateway) {
+			$instances[$pgid] = $this->getGatewayInstance($gateway);
+		}
+		
+		return $instances;
 	}
 	
 	function getInvoices() {
