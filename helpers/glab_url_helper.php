@@ -43,13 +43,6 @@ function assets_url ($asset_uri=null) {
 	return $base_url.$asset_uri;
 }
 
-// Overrides CI Function
-function site_url($uri = '',$secure=FALSE) {
-	$CI =& get_instance();
-	if ($secure) return "https://".ltrim($CI->config->site_url($uri),'http://');
-	else return $CI->config->site_url($uri);
-}
-
 function company_url ($uri) {
 	if (preg_match("/glabdev.net/", $_SERVER['SERVER_NAME'])) return site_url($uri);
 	else return 'http://glabstudios.com/'.$uri;

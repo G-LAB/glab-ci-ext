@@ -32,7 +32,7 @@ class Twitter {
 			trigger_error('Cannot connect to Twitter.  Auth keys unavailable.');
 		} 
 		
-		require_once APPPATH.'/libraries/twitteroauth.php';
+		require_once 'twitteroauth.php';
 		$this->api = new TwitterOAuth(
 			$this->CI->config->item('auth_twitter_consumer_key'),
 			$this->CI->config->item('auth_twitter_consumer_secret'),
