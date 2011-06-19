@@ -13,7 +13,7 @@ class Yubikey
 	
 	function validate ($ykid) {
 		$CI =& get_instance();
-		$CI->load->helper(array('api','array'));
+		$CI->load->helper(array('glab_api','array'));
 		
 		$params['id'] = 3468;
 		$params['otp'] = $ykid;

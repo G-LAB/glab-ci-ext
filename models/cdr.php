@@ -32,7 +32,7 @@ class Cdr extends CI_Model {
 	}
 	
 	function _request ($params) {
-		$this->load->helper('api');
+		$this->load->helper('glab_api');
 		return unserialize(API_Request('get', 'http://pbx.glabstudios.com/api.php', $params));
 	}
 
