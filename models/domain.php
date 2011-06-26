@@ -12,7 +12,7 @@ class Domain extends CI_Model {
 	}
 	
 	function accounts ($eid=false,$offset=0) {
-		$domains = $this->db->limit(10, $offset)->from('domains')->order_by("CONCAT(lastName,firstName,companyName)");
+		$domains = $this->db->limit(10, $offset)->from('domains');//->order_by("CONCAT(lastName,firstName,companyName)");
 		if ($eid) $domains = $domains->where('eid', $eid);
 		$domains = $domains->get()->result_array();
 		
