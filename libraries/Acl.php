@@ -23,10 +23,8 @@ class Acl
 		// Controllers That Need No Authentication		
 		$whitelist[] = 'login';
 		$whitelist[] = 'autocomplete';
-		//$whitelist[] = 'ajax';
 		$whitelist[] = 'cron';
 		$whitelist[] = 'pbx';
-		$whitelist[] = 'cu3er';
 		
 		// Get EID of Current User
 		$eid = $this->CI->entity->getEid();
