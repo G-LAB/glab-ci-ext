@@ -20,6 +20,7 @@ class Twitter {
 	function __construct () {
 		
 		$this->CI =& get_instance();
+		$this->CI->load->config('auth');
 		
 		$this->CI->config->item('auth_twitter_consumer_key');
 		

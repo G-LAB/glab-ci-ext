@@ -14,7 +14,10 @@ class Yelp
 	function __construct ($auth_key=false) {
 		
 		// Load Codeigniter, If Available
-		if (function_exists('get_instance')) $CI = &get_instance();
+		if (function_exists('get_instance')) {
+			$CI = &get_instance();
+			$CI->load->config('auth');
+		}
 		
 		if (isset($CI) AND $CI->config->item('auth_yelp_key')) $this->auth_key = $CI->config->item('auth_yelp_key');
 		elseif ($auth_key) $this->auth_key = $auth_key;
