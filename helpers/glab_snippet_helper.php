@@ -2,6 +2,8 @@
 
 function entity_link($eid,$name=null,$return=FALSE,$trim=FALSE)
 {
+	trigger_error('Snippet helper\'s entity_link() has been depreciated in favor of profile_link().',E_USER_DEPRECATED);
+	
 	$CI =& get_instance();
 	
 	// Set CLass
@@ -12,8 +14,29 @@ function entity_link($eid,$name=null,$return=FALSE,$trim=FALSE)
 	if ($name == null) $name = $CI->entity->getValue('name',$eid);
 	
 	// Return HTML
-	if (is_numeric($eid) && $name) return '<a href="/backend/index.php/profile/view/'.$eid.'" onclick="updateHUD('.$eid.')"'.$trim.'>'.$name.'</a>';
+	if (is_numeric($eid) && $name) return '<a href="/backend/index.php/profile/view/'.$eid.'" onclick="updateHUD(\''.$eid.'\')"'.$trim.'>'.$name.'</a>';
 	else return $return;
+}
+
+function profile_link($profile)
+{
+	$CI =& get_instance();
+	
+	$profile = $CI->profile->get($profile);
+	
+	// Return HTML
+	if ($profile == true) 
+	{
+		$html = '<a href="/backend/index.php/profile/view/'.$profile->pid_hex.'" onclick="updateHUD('.$profile->pid_hex.')">';
+		$html.= $profile->name->friendly;
+		$html.= '</a>';
+		
+		return $html;
+	}
+	else 
+	{
+		return $return_value;
+	}
 }
 
 function controller_name () {

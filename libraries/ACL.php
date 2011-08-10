@@ -6,7 +6,7 @@
  * Copyright 2010
  */
 
-class Acl 
+class ACL 
 {
 
 	private $CI;
@@ -18,23 +18,17 @@ class Acl
 		
 		$this->CI->load->library('session');
 		$this->CI->load->helper('url');
-		$this->CI->load->model('entity');
-		
-		// Controllers That Need No Authentication		
-		$whitelist[] = 'login';
-		$whitelist[] = 'autocomplete';
-		$whitelist[] = 'cron';
-		$whitelist[] = 'pbx';
-		
-		// Get EID of Current User
-		$eid = $this->CI->entity->getEid();
+		$this->CI->load->model('profile');
 		
 		// Send to Login if No Session
-		if (!$eid && !in_array($this->CI->router->fetch_class(),$whitelist)) {
-			redirect ('login');
+		if ($this->is_auth() !== true  && $this->CI->router->fetch_class() != 'login') 
+		{
+			redirect('login');
+		}
 		
 		// Run ACL Check
-		} else {
+		else 
+		{
 			
 			require_once 'Zend/Acl.php';
 			require_once 'Zend/Acl/Role.php';
@@ -42,7 +36,7 @@ class Acl
 			
 			// Load Up Zend ACL
 			$this->acl = new Zend_Acl();
-			
+			/*
 			// Set Roles
 			$this->acl	->addRole(new Zend_Acl_Role('guest'))
 						->addRole(new Zend_Acl_Role('client'), 'guest')
@@ -79,25 +73,41 @@ class Acl
 			//$this->acl->deny();
 			
 			foreach ($whitelist as $wl) $this->acl->allow('guest', 'cms_'.$wl);
-			$this->acl->allow('employee');
+			$this->acl->allow('employee');*/
 			
 			// Validate Login
 			$error_msg = "<div class=\"error msg\">Sorry, you do not have permission to access this page.</div>";
-			$error_msg.= "<p>If you feel this is in error, please contact Ryan at x101.</p>";
-			if (!$this->isPermitted()) show_error($error_msg,403);
+			$error_msg.= "<p>If you feel this message is in error, please contact us at 1.877.620.GLAB.</p>";
+			if ($this->is_permitted() !== true) show_error($error_msg,403);
 		
 		}
 		
 	}
 	
-	function isPermitted($resource=FALSE,$eid=FALSE) {
+	function create_session ($pid) {
+		$CI =& get_instance();
+		$CI->load->library('session');
+		$CI->session->set_userdata('pid', $pid);
+		return TRUE;
+	}
+	
+	function get_pid () {
+		return $this->CI->session->userdata('pid');
+	}
+	
+	function is_auth() { 
+		return ($this->get_pid()) ? true : false;
+	}
+	
+	function is_permitted($resource=false,$profile=false) {
+		if ($this->is_auth() == true  || $this->CI->router->fetch_class() == 'login') return true;
 		
-		if (!$resource) $resource = $this->CI->config->item('app_name').'_'.$this->CI->router->fetch_class();
+		/*if (!$resource) $resource = $this->CI->config->item('app_name').'_'.$this->CI->router->fetch_class();
 		
 		if (!$eid) $eid = $this->CI->entity->getEid();
 		
 		if ($this->acl->has("$resource")) return $this->acl->isAllowed("$eid", "$resource" );
-		else return FALSE;
+		else return FALSE;*/
 		
 	}
 	

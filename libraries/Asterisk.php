@@ -70,9 +70,7 @@ class Asterisk
 		} catch (PEAR_Exception $e) { echo $e; }
 	}
 	
-	function getVMCount ($ext=FALSE) {
-		
-		if ($ext == FALSE) $ext = $this->CI->entity->getAdminValue('vmbox');
+	function getVMCount ($ext) {
 		
 		// Print all the queues on the server
 		try { return $this->ast->getMailboxCount($ext);

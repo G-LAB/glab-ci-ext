@@ -15,4 +15,5 @@ $config['auth_mediatemple_key'] = 'FbDgCrdQNr9V31Vt1u46Kwtsm3FbSE4TBJZp3z2CxWxl5
 $config['auth_aws_key_access'] = 'AKIAJV4IUPEV4MWFF7TA';
 $config['auth_aws_key_secret'] = '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';
 
-$config['auth_yubico_id'] = '3468';
+$config['auth_yubico_id'] = '6035';
+$config['auth_yubico_key'] = '876KZaEOws51smXCypY97Fc5ljc=';
