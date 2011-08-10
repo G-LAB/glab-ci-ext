@@ -14,7 +14,7 @@ class Entity extends CI_Model {
 	}
 	
 	function get($eid=null, $getPrefs=FALSE, $getAdmin=FALSE) {
-		
+		trigger_error('The Entity model has been depreciated, use the profile model instead.',E_USER_DEPRECATED);
 		if (is_array($eid)) $is_array = TRUE;
 		elseif (is_string($eid) || is_numeric($eid)) $is_array = FALSE;
 		else return FALSE;
@@ -331,15 +331,6 @@ class Entity extends CI_Model {
 		return $this->db->delete('emailbook');
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	function getNewAcctnum ($acctnum=null) {
 		
 		if ($acctnum==null) $acctnum = time();
@@ -372,11 +363,6 @@ class Entity extends CI_Model {
 		}
 		
 		return $r;
-	}
-	
-	function lastLogin($eid=null,$offset=1) {
-		if ($eid==null) $eid = $this->getEID();
-		return strtotime($this->event->getValue('admin_login','timestamp',$eid,$offset));
 	}
 	
 }
