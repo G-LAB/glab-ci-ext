@@ -20,22 +20,28 @@ function entity_link($eid,$name=null,$return=FALSE,$trim=FALSE)
 
 function profile_link($profile)
 {
-	$CI =& get_instance();
-	
-	$profile = $CI->profile->get($profile);
-	
-	// Return HTML
-	if ($profile == true) 
+	if ($profile == true)
 	{
-		$html = '<a href="/backend/index.php/profile/view/'.$profile->pid_hex.'" onclick="updateHUD('.$profile->pid_hex.')">';
-		$html.= $profile->name->friendly;
-		$html.= '</a>';
+		$CI =& get_instance();
+		$profile = $CI->profile->get($profile);
 		
-		return $html;
+		// Return HTML
+		if ($profile == true) 
+		{
+			$html = '<a href="/backend/index.php/profile/view/'.$profile->pid_hex.'" onclick="updateHUD('.$profile->pid_hex.')">';
+			$html.= $profile->name->friendly;
+			$html.= '</a>';
+			
+			return $html;
+		}
+		else 
+		{
+			return $return_value;
+		}
 	}
-	else 
+	else
 	{
-		return $return_value;
+		return "UNKNOWN CLIENT";
 	}
 }
 
