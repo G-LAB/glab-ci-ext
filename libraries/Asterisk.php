@@ -26,7 +26,7 @@ class Asterisk
 		/**
 		 * The parameters for connecting to the server
 		 */
-		$params = array('server' => 'pbx.glabstudios.com', 'port' => '5038');
+		$params = array('server' => 'pbx.glabstudios.net', 'port' => '5038');
 		
 		/**
 		 * Instantiate Asterisk object and connect to server
@@ -46,7 +46,7 @@ class Asterisk
 		 * Login to manager API
 		 */
 		try {
-		    $this->ast->login('backend', 'n82EpowYt93d');
+		    $this->ast->login('glab_cms', 'n82EpowYt93d');
 		} catch(PEAR_Exception $e) {
 		    echo $e;
 		}
