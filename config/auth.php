@@ -17,3 +17,10 @@ $config['auth_aws_key_secret'] = 'HNikf2ZgOcjgaN4iPcjer7ZU5tg7unQhBJ7qLbvN';
 
 $config['auth_yubico_id'] = '6035';
 $config['auth_yubico_key'] = '876KZaEOws51smXCypY97Fc5ljc=';
+
+$config['auth_mail_incoming_host'] = 'imap.gmail.com';
+$config['auth_mail_incoming_port'] = '993';
+$config['auth_mail_incoming_user'] = 'cms@glabstudios.com';
+$config['auth_mail_incoming_pass'] = '3puPdwPk6bQNoC';
+
+// SMTP Settings in email.php

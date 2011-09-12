@@ -1,6 +1,6 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-require 'S3.php';
+require_once 'S3.php';
 
 /**
  * G LAB Amazon S3 Backup Library for Code Igniter v2
@@ -16,7 +16,9 @@ class S3_Backup extends S3 {
 		
 		parent::__construct();
 		
-		$this->setAuth($this->config->item('auth_aws_key_access'), $this->config->item('auth_aws_key_secret'));
+		$CI =& get_instance();
+		
+		$this->setAuth($CI->config->item('auth_aws_key_access'), $CI->config->item('auth_aws_key_secret'));
 	}
 	
 	function create ($localpath,$remotepath) {

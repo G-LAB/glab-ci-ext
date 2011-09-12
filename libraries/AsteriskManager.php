@@ -339,7 +339,7 @@ class Net_AsteriskManager
      *
      * @return string|bool
      */
-    public function getQueues()
+    public function get_queues()
     {
         $this->_checkSocket();
 

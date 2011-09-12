@@ -83,9 +83,7 @@ class Mailman
 	var $msg_id = 0;
 	var $msg_count = 0;
 	
-	public $CI;
-	
-	private $S3_bucket = 'glab-attachments';
+	private $CI;
 	
 	// constructor function handles array items passed
 	// by the config file loader in CI, or they can be passed
@@ -105,13 +103,7 @@ class Mailman
 			$this->connect_and_count($init_array);
 		}
 		
-		require_once 'S3.php';
-		
-		$this->CI =& get_instance();
-		
-		$accessKey = $this->CI->config->item('auth_aws_key_access');
-		$secretKey = $this->CI->config->item('auth_aws_key_secret');
-		S3::setAuth($accessKey, $secretKey);
+		$this->CI = &get_instance();
 	}
 	
 	
@@ -277,7 +269,7 @@ class Mailman
 	// So, gmail does not seem to be affected by imap_delete() imap_expunge(),
 	// it only cares about its own settings with regard to how 
 	// to handle message storage after a POP3 connection
-	function delete_and_expunge($id_or_range)
+	function delete($id_or_range)
 	{
 		// make sure we've got a message there of that id
 		// and it's not a bogus id like 0 or -1
@@ -289,23 +281,15 @@ class Mailman
 		{
 			// should capture error here when the message doesn't exist
 			imap_delete($this->IMAP_resource, $this->msg_id);
-			imap_expunge($this->IMAP_resource);
-			$this->IMAP_state = 'Deleted and Expunged message id_or_range: ' . $this->msg_id;
+			//imap_expunge($this->IMAP_resource);
+			$this->IMAP_state = 'Deleted message id_or_range: ' . $this->msg_id;
 			return TRUE;
 		}
 		else
 		{
-			$this->IMAP_state = 'Could not delete and expunge message id_or_range: ' . $this->msg_id;
+			$this->IMAP_state = 'Could not delete message id_or_range: ' . $this->msg_id;
 			return FALSE;
 		}
-	}
-	
-	function delete_and_expunge_all()
-	{
-			imap_delete($this->IMAP_resource, '1:'.$this->msg_count);
-			imap_expunge($this->IMAP_resource);
-			$this->IMAP_state = 'Deleted and Expunged all messages.';
-			return TRUE;
 	}
 	
 	// deal with most of the variations in the msg_id spec
@@ -580,46 +564,46 @@ class Mailman
 	* it will recurse and use the initial part number
 	* concatenating it with nested parts using dot .
 	* Useful information copied from http://php.net 
-	
-	Table 142.  Returned Objects for imap_fetchstructure()
-	
-	type	Primary body type
-	encoding	Body transfer encoding
-	ifsubtype	TRUE if there is a subtype string
-	subtype	MIME subtype
-	ifdescription	TRUE if there is a description string
-	description	Content description string
-	ifid	TRUE if there is an identification string
-	id	Identification string
-	lines	Number of lines
-	bytes	Number of bytes
-	ifdisposition	TRUE if there is a disposition string
-	disposition	Disposition string
-	ifdparameters	TRUE if the dparameters array exists
-	dparameters	An array of objects where each object has an "attribute" and a "value" property corresponding to the parameters on the Content-disposition MIMEheader.
-	ifparameters	TRUE if the parameters array exists
-	parameters	An array of objects where each object has an "attribute" and a "value" property.
-	parts	An array of objects identical in structure to the top-level object, each of which corresponds to a MIME body part.
-	
-	Table 143. Primary body type
-	0	text
-	1	multipart
-	2	message
-	3	application
-	4	audio
-	5	image
-	6	video
-	7	model
-	8	other
-	9	unknown/unknown
-	
-	Table 144. Transfer encodings
-	0	7BIT
-	1	8BIT
-	2	BINARY
-	3	BASE64
-	4	QUOTED-PRINTABLE
-	5	OTHER
+ 	* 
+	* Table 142.  Returned Objects for imap_fetchstructure()
+	* 
+	* type	Primary body type
+	* encoding	Body transfer encoding
+	* ifsubtype	TRUE if there is a subtype string
+	* subtype	MIME subtype
+	* ifdescription	TRUE if there is a description string
+	* description	Content description string
+	* ifid	TRUE if there is an identification string
+	* id	Identification string
+	* lines	Number of lines
+	* bytes	Number of bytes
+	* ifdisposition	TRUE if there is a disposition string
+	* disposition	Disposition string
+	* ifdparameters	TRUE if the dparameters array exists
+	* dparameters	An array of objects where each object has an "attribute" and a "value" property corresponding to the parameters on the Content-disposition MIMEheader.
+	* ifparameters	TRUE if the parameters array exists
+	* parameters	An array of objects where each object has an "attribute" and a "value" property.
+	* parts	An array of objects identical in structure to the top-level object, each of which corresponds to a MIME body part.
+	* 
+	* Table 143. Primary body type
+	* 0	text
+	* 1	multipart
+	* 2	message
+	* 3	application
+	* 4	audio
+	* 5	image
+	* 6	video
+	* 7	model
+	* 8	other
+	* 9	unknown/unknown
+	* 
+	* Table 144. Transfer encodings
+	* 0	7BIT
+	* 1	8BIT
+	* 2	BINARY
+	* 3	BASE64
+	* 4	QUOTED-PRINTABLE
+	* 5	OTHER
 	*/
 	
 	function extract_a_part($part_def_obj, $part_number)
@@ -684,16 +668,6 @@ class Mailman
 						'type'=>$part_def_obj->type,
 						'subtype'=>$sub_type);
 			}
-			
-			// now write the attachments to the disk
-			
-			// Get store dir, call this every message based on
-			// the email data so it can hold all parts for a single email
-			//$dir = $this->dir_name();
-			$a_f = $this->decode_mime_text($filename);
-			// replace crap with underscore, there is a CI function to do this
-			$a_f = preg_replace('/[^a-z0-9_\-\.]/i', '_', $a_f);
-			//$this->save_files($dir.$a_f, $part_string);
 			
 		}
 		//Additional elseif clause added to detect text file attachments.
@@ -867,7 +841,7 @@ class Mailman
 	{
 		if (is_resource($this->IMAP_resource))
 		{
-			$closed = imap_close($this->IMAP_resource);
+			$closed = imap_close($this->IMAP_resource,CL_EXPUNGE);
 			$this->IMAP_state = 'Connection closed.';
 		}
 		else
@@ -883,27 +857,9 @@ class Mailman
 	 * Save messages on local disc, potential 
 	 * name and file lock collision here
 	 */ 
-		function save_files($filename, $data)
+	function save_files($filename, $data)
 	{
-		$tmpfname = tempnam("/tmp", "attachment_");
-		$handle = fopen($tmpfname, "w");
-		fwrite($handle, $data);
-		fclose($handle);
 		
-		S3::putObject(
-	        S3::inputFile($tmpfname),
-	        $this->S3_bucket,
-	        $filename,
-	        S3::ACL_PRIVATE,
-	        array(),
-	        array( // Custom $requestHeaders
-	            "Cache-Control" => "max-age=315360000",
-	            "Expires" => gmdate("D, d M Y H:i:s T", strtotime("+5 years"))
-	        )
-	    );
-	    
-	    unlink($tmpfname);
-
 	}
 	
 	//-----------------------------------------------
@@ -965,11 +921,6 @@ class Mailman
 		// Get message header as array of pertinent values
 		$email_array = $this->grab_email_as_array($this->msg_id);
 		
-		// Get store dir, call this every message based on
-		// the email data so it can hold all parts for a single email
-		// make a new dir based on the fingerprint
-		$path = $email_array['strings']['email_fingerprint_auto'].'/';
-		
 		// now write files into the new directory 
 		// named with the fingerprint hash
 	
@@ -983,34 +934,50 @@ class Mailman
 		{
 			
 			//what does this part look like?
-			if (isset($part['text']['type']) AND ($part['text']['type'] == 'HTML' OR $part['text']['type'] == 'PLAIN'))
+			if (
+				isset($part['text']['type']) 
+				AND ($part['text']['type'] == 'HTML' OR $part['text']['type'] == 'PLAIN')
+			)
 			{
 				// handle PLAIN and HTML types elsewhere
 	
 			}
+			elseif ($email_array['arrays']['to'][0]['mailbox'] == 'fax' AND isset($part['attachment']) AND $part['attachment'])
+			{
+				$this->CI->load->model('document');
+				
+				foreach (array($part['attachment']) as $attach)
+				{
+					$email_array['fax_success'] = $this->CI->document->add_fax($attach['string'],$email_array['arrays']['from'][0]['personal']);
+				}
+				
+				
+			}
 			elseif (isset($part['attachment']) AND $part['attachment'])
 			{
+				$this->CI->load->model('ticket');
+				
 				// Save file attachments to disk
 				foreach (array($part['attachment']) as $attach)
 				{
 					$a_f = $this->decode_mime_text($attach['filename']);
 					// replace crap with underscore, there is a CI function to do this
 					$a_f = preg_replace($pattern_for_filename, '_', $a_f);
-					$filename = $path.$a_f;
-					$this->save_files($filename, $attach['string']);
+					$this->CI->ticket->add_attachment($email_array['strings']['email_fingerprint_auto'],$a_f,$attach['string']);
 				}
 			
 			}
 			elseif (isset($part['image']) AND $part['image'])
 			{
+				$this->CI->load->model('ticket');
+				
 				// Save image attachments to disk
 				foreach ($part['image'] as $image)
 				{
 					$i_f = $this->decode_mime_text($image['filename']);
 					// replace crap with underscore, there is a CI function to do this
 					$i_f = preg_replace($pattern_for_filename, '_', $i_f);
-					$filename = $path.$i_f;
-					$this->save_files($filename, $image['string']);
+					$this->CI->ticket->add_attachment($email_array['strings']['email_fingerprint_auto'],$i_f,$image['string']);
 				}
 			}
 		}

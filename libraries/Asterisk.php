@@ -80,10 +80,10 @@ class Asterisk
 		
 	}
 	
-	function getQueues () {
+	function get_queues () {
 		
 		// Print all the queues on the server
-		try { return $this->ast->getQueues();
+		try { return $this->ast->get_queues();
 		} catch(PEAR_Exception $e) {
 		    echo $e;
 		}
