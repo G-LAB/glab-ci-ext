@@ -104,7 +104,7 @@ class Document extends CI_Model
 			return $this->add($stream,$pid,'Faxed Document','Incoming fax from '.tel_format($tel),'fax');
 	}
 	
-	function get ($offset=0,$limit=10,$type=false)
+	function fetch_array ($offset=0,$limit=10,$type=false)
 	{
 		$q = $this->db	->limit($limit,$offset)
 						->order_by('dcid','DESC');
@@ -131,6 +131,21 @@ class Document extends CI_Model
 		
 		return $r;
 	}
+
+	function get ($dcid)
+	{
+		if (ctype_xdigit($dcid) === true)
+		{
+			$dcid = hexdec($dcid);
+		}
+
+		$data = $this->db->where('dcid',$dcid)->limit(1)->get('documents');
+
+		if ($data->num_rows() == 1)
+		{
+			return $data->row();
+		}
+	}
 	
 	function get_count_new ()
 	{
@@ -147,6 +162,21 @@ class Document extends CI_Model
 		return S3::getBucket($this->S3_bucket, $file_id.'/page');
 	}
 	
+	function get_tmp_path ($file_id)
+	{
+		$this->load->helper('file');
+
+		$data = @file_get_contents($this->get_url($file_id.'/original.pdf'));
+
+		$path = tempnam(sys_get_temp_dir(),'fax_');
+
+		if (empty($data) !== true)
+		{
+			write_file($path,$data);
+			return $path;
+		}
+	}
+
 	function get_thumbs ($file_id)
 	{
 		return S3::getBucket($this->S3_bucket, $file_id.'/thumb');
