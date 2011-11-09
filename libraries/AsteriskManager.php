@@ -435,12 +435,9 @@ class Net_AsteriskManager
     }
 	
 	public function getChannels() {
-	    $this->_checkSocket();
-		return $this->_sendCommand("Action: Command\r\n"
-	    							."Command: core show channels\r\n"
-	    							."\r\n");
-	}
-	
+        $this->_checkSocket();
+        return $this->_sendCommand("Action: CoreShowChannels\r\n\r\n");
+    }
 	
     /**
      * Get the status information for a channel

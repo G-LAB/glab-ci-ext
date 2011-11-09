@@ -55,13 +55,19 @@ class Asterisk
 
 	}
 	
-	function getChannels() {
-	
-		// Get all the channels on the server
-		try { return $this->_processCLI($this->ast->getChannels());
-		} catch (PEAR_Exception $e) { echo $e; }
+	function get_channels() {
+		try 
+		{ 
+			return $this->_processAPI($this->ast->getChannels());
+			//if (isset($data[0])) return $data[0];
+			//else return FALSE;
+		} 
+		catch (PEAR_Exception $e) 
+		{ 
+			echo $e; 
+		}
 	}
-	
+
 	function getChannelStatus($channel) {
 		try { 
 			$data =  $this->_processAPI($this->ast->getChannelStatus($channel));
@@ -138,7 +144,8 @@ class Asterisk
 		
 		// Explode into groups
 		$data = explode("\r\n\r\n",$data);
-		foreach ($data as $key=>$group) {
+		foreach ($data as $key=>$group) 
+		{
 			
 			// Explode group into lines
 			$data[$key] = explode("\n",$group);
@@ -147,18 +154,19 @@ class Asterisk
 			if (count($data[$key]) > $max) $max = count($data[$key]);
 		}
 		
-		foreach ($data as $key=>$group) foreach ($group as $line) {
-				if (count($group)==$max) {
-					$thisLine = explode(': ',$line);
-					$lineKey = $thisLine[0];
-					$lineValue = $thisLine[1];
-					
-					$newData[$key][$lineKey] = rtrim($lineValue);
-				}						
+		foreach ($data as $key=>$group) foreach ($group as $line) 
+		{
+			if (count($group)==$max) 
+			{
+				$thisLine = explode(': ',$line);
+				$lineKey = $thisLine[0];
+				$lineValue = $thisLine[1];
+				
+				$newData[$key][$lineKey] = rtrim($lineValue);
+			}						
 		}
-		sort($newData);
+		
 		return $newData;
-	
 	}
 	
 	private function _processCLI ($data) {
