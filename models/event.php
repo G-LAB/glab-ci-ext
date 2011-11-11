@@ -26,7 +26,7 @@ class Event extends CI_Model
 		
 		if ($pid !== false)
 		{
-			$q->set('profile', $pid);
+			$q->set('pid', $pid);
 		}
 		
 		if ($data !== false)
@@ -44,8 +44,33 @@ class Event extends CI_Model
 		}
 	}
 	
+	public function get($evid)
+	{
+		$this->load->helper(array('array'));
+		$this->load->language('event');
+		
+		$data = $this->db	
+					->select('*')
+					->select('inet_ntoa(ip_address) as ip_address',false)
+					->limit(1)
+					->where('evid',$evid)
+					->get('event_log')
+					->row();
+		
+		if (count($data) > 0)
+		{
+			$data->template = $this->lang->line('event_'.$data->event_type);
+			return $data;
+		}
+		else
+		{
+			$empty = new StdClass;
+			return $empty;
+		}
+	}
+
 	// Get Logfile
-	public function get($filter=false,$limit=30,$offset=0)
+	public function fetch_array($filter=false,$limit=30,$offset=0)
 	{
 		$this->load->helper(array('array'));
 		$this->load->language('event');

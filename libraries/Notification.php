@@ -29,7 +29,7 @@ class Notification
 		// Parse Recipients
 		if (is_string($recipients) === true)
 		{
-			$recipients = explode(',', $recip, 20);
+			$recipients = explode(',', $recipients, 20);
 		}
 		
 		foreach ($recipients as $recip)
@@ -85,7 +85,14 @@ class Notification
 			
 			if (is_string($email['entity']['email']) === true)
 			{
-				$success = $CI->email->send();
+				if (strtolower(ENVIRONMENT) === 'production')
+				{
+					$success = $CI->email->send();
+				}
+				else
+				{
+					User_Notice::warning('Notification to '.$email['entity']['email'].' suppressed.');
+				}
 			}
 		}
 		
