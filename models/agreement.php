@@ -69,8 +69,8 @@ class Agreement extends CI_Model {
 		
 		$this->db->set('agrvid',$agrvid);
 		$this->db->set('signature',$signature);
-		$this->db->set('eid',$request['eid']);
-		$this->db->set('peid',$request['peid']);
+		$this->db->set('pid_signer',$request['pid_signer']);
+		$this->db->set('pid',$request['pid']);
 		
 		$this->db->insert('agreements_signatures');
 		
