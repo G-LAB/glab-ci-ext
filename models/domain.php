@@ -2,29 +2,33 @@
 
 class Domain extends CI_Model {
 	
-	function __construct () {
+	function __construct () 
+	{
 		parent::__construct();
 		$this->load->library('OpenSRS');
 	}
 	
-	function get ($domain) {
+	function get ($domain) 
+	{
 		return $this->opensrs->domain()->get($domain);
 	}
 	
-	function accounts ($eid=false,$offset=0) {
-		$domains = $this->db->limit(10, $offset)->from('domains');//->order_by("CONCAT(lastName,firstName,companyName)");
-		if ($eid) $domains = $domains->where('eid', $eid);
+	function accounts ($pid=false,$offset=0) 
+	{
+		$domains = $this->db->limit(10, $offset)->from('domains');// @todo ->order_by("CONCAT(lastName,firstName,companyName)");
+		if ($pid) $domains = $domains->where('pid', $pid);
 		$domains = $domains->get()->result_array();
 		
 		foreach ($domains as $row) {
 			$domain = $this->opensrs->domain();
-			$data[element('eid',$row)][element('domain',$row)] = $domain->get(element('domain',$row));
+			$data[element('pid',$row)][element('domain',$row)] = $domain->get(element('domain',$row));
 		}
 		
 		return $data;
 	}
 	
-	function is_available ($domain) {
+	function is_available ($domain) 
+	{
 		return $this->opensrs->domain()->lookup($domain);
 	}
 	
