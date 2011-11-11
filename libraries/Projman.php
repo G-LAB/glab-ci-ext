@@ -49,9 +49,8 @@ class Projman {
 								RIGHT JOIN proj_tasks ptsk 
 								USING (tskid) 
 								GROUP BY tskid) AS sums 
-							WHERE pjid=p.pjid),2) AS avgComplete, 
-						CONCAT(companyName,firstName," ",lastName) AS entity_name 
-					FROM proj_projects p LEFT JOIN entities e USING (eid) ';
+							WHERE pjid=p.pjid),2) AS avgComplete
+					FROM proj_projects p ';
 		if ($hideCancelled) $query.='WHERE p.status > 0 ';
 		$query.='ORDER BY status, tsDue, tsStart';
 		$query = $CI->db->query($query);
@@ -108,11 +107,11 @@ class Projman {
 		return $tasks;
 	}
 	
-	function addProject ($eid, $name, $description, $status, $hideDetails) {
+	function addProject ($pid, $name, $description, $status, $hideDetails) {
 		$CI =& get_instance();
 		$CI->load->database();
 		
-		$query = 'INSERT INTO proj_projects SET eid = "'.$eid.'", name = "'.$name.'", description = "'.$description.'", status = "'.$status.'", hideDetails = "'.$hideDetails.'" ';
+		$query = 'INSERT INTO proj_projects SET pid = "'.$pid.'", name = "'.$name.'", description = "'.$description.'", status = "'.$status.'", hideDetails = "'.$hideDetails.'" ';
 		
 		return $CI->db->query($query);
 	}
