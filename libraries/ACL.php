@@ -12,20 +12,20 @@ class ACL
 	private $CI;
 	private $acl;
 	
-	function __construct () {
+	function __construct () 
+	{
 	
 		$this->CI = $CI =& get_instance();
 		
 		$this->CI->load->library('session');
 		$this->CI->load->helper('url');
 		$this->CI->load->model('profile');
-		
+
 		// Send to Login if No Session
-		if ($this->is_auth() !== true  && $this->CI->router->fetch_class() != 'login') 
+		if ($this->is_permitted(false,$this->CI->router->fetch_class()) !== true) 
 		{
 			redirect('login');
 		}
-		
 		// Run ACL Check
 		else 
 		{
@@ -78,37 +78,44 @@ class ACL
 			// Validate Login
 			$error_msg = "<div class=\"error msg\">Sorry, you do not have permission to access this page.</div>";
 			$error_msg.= "<p>If you feel this message is in error, please contact us at 1.877.620.GLAB.</p>";
-			if ($this->is_permitted() !== true) show_error($error_msg,403);
+			if ($this->is_permitted(false,$this->CI->router->fetch_class()) !== true) show_error($error_msg,403);
 		
 		}
 		
 	}
 	
-	function create_session ($pid) {
+	function create_session ($pid) 
+	{
 		$CI =& get_instance();
 		$CI->load->library('session');
 		$CI->session->set_userdata('pid', $pid);
 		return TRUE;
 	}
 	
-	function get_pid () {
+	function get_pid () 
+	{
 		return $this->CI->session->userdata('pid');
 	}
 	
-	function is_auth() { 
+	function is_auth() 
+	{ 
 		return ($this->get_pid()) ? true : false;
 	}
 	
-	function is_permitted($resource=false,$profile=false) {
-		if ($this->is_auth() == true  || $this->CI->router->fetch_class() == 'login') return true;
-		
-		/*if (!$resource) $resource = $this->CI->config->item('app_name').'_'.$this->CI->router->fetch_class();
-		
-		if (!$eid) $eid = $this->CI->entity->getEid();
-		
-		if ($this->acl->has("$resource")) return $this->acl->isAllowed("$eid", "$resource" );
-		else return FALSE;*/
-		
+	function is_permitted($pid=false,$resource=false,$action=false) 
+	{
+		$white_list[] = 'asset';
+		$white_list[] = 'login';
+		$white_list[] = 'cron';
+
+		if ($this->is_auth() === true  ||  in_array(strtolower($resource),$white_list) === true) 
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 }
