@@ -128,19 +128,6 @@ class Accounting extends CI_Model {
 		$ledger = $this->db->query($query);
 		$ledger = $ledger->result_array();
 		
-		foreach ($ledger as $entryid=>$entryvalue) {
-			// Creator ID Number
-			$eid = $entryvalue['eidCreated'];
-			// Replace with creator profile
-			$ledger[$entryid]['eidCreated'] = $this->users->getData($eid);
-			
-			// Creator ID Number
-			$eid = $entryvalue['payee_entity'];
-			// Replace with creator profile
-			$ledger[$entryid]['payee_entity'] = $this->users->getData($eid);
-			
-		}
-		
 		return $ledger;
 	}
 	
@@ -184,8 +171,8 @@ class Accounting extends CI_Model {
 			'acid_credit' => $acid_credit,
 			'amount' => $amount,
 			'memo' => $memo,
-			'eidCreated' => $this->entity->getEID(),
-			'ivimid' => $ivimid
+			'ivimid' => $ivimid,
+			'event' => $this->event->log('acc_ledger_entry_new',$this->profile->current()->pid)
 		);
 		$this->db->insert('acc_ledger',$data);
 		
@@ -205,7 +192,7 @@ class Accounting extends CI_Model {
 		
 		//echo $data['date'];
 		
-		if ($ledger != null) $query = $this->db->query('INSERT INTO acc_checks SET legid = '.$ledger.', checknum = '.$data['checkNumber'].', payee = "'.$data['payee-name'].'", payee_entity = '.$data['payee'].', checkDate = "'.$data['date'].'" ');
+		if ($ledger != null) $query = $this->db->query('INSERT INTO acc_checks SET legid = '.$ledger.', checknum = '.$data['checkNumber'].', payee = "'.$data['payee-name'].'", pid = '.$data['payee'].', checkDate = "'.$data['date'].'" ');
 		
 		if ($query) return $data;
 		else return false;
