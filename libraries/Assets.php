@@ -28,7 +28,8 @@ abstract class Asset_loader extends CI_Controller
 		if (realpath($path) !== false)
 		{
 			header('Content-Type: '.get_mime_by_extension(basename($path)));
-			header('Cache-Control: no-cache');
+			header('Cache-Control: max-age=3600, must-revalidate');
+			header('Last-Modified: '.standard_date('DATE_COOKIE',filemtime($path)));
 			echo read_file($path);
 			exit;
 		}
