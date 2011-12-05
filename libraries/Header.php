@@ -30,9 +30,9 @@ class Header
 		
 		foreach ($this->headers as $line) {
 			if ($line['type'] == 'js')
-				$js .= '<script type="text/javascript" src="'.assets_url().'js/'.$line['path'].'.js"></script>'."\n";
+				$js .= '<script type="text/javascript" src="'.assets_url('js/'.$line['path'].'.js').'"></script>'."\n";
 			elseif ($line['type'] == 'css')
-				$css .= '<link rel="stylesheet" type="text/css" href="'.assets_url().'styles/'.$line['path'].'.css"/>'."\n";
+				$css .= '<link rel="stylesheet" type="text/css" href="'.assets_url('styles/'.$line['path'].'.css').'"/>'."\n";
 		}
 		
 		if ($realm == FALSE || $realm == 'css') {

@@ -31,18 +31,6 @@ function controller_url () {
 
 }
 
-function assets_url ($asset_uri=null) {
-	
-	if (ENVIRONMENT != 'production') {
-		$base_url =  'https://glabassets.s3.amazonaws.com/';
-	} else {
-		if ( isset($_SERVER['HTTPS']) ) $base_url = 'https://dbvnztzf4j5z6.cloudfront.net/';
-		else $base_url = 'http://assets.glabstudios.com/';
-	}
-	
-	return $base_url.$asset_uri;
-}
-
 function company_url ($uri) {
 	if (preg_match("/glabdev.net/", $_SERVER['SERVER_NAME'])) return site_url($uri);
 	else return 'http://glabstudios.com/'.$uri;
