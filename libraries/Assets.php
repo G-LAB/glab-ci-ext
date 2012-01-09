@@ -18,7 +18,7 @@ abstract class Asset_loader extends CI_Controller
 		$segments = $this->uri->segment_array();
 		array_shift($segments);
 
-		$path = APPPATH.'assets';
+		$path = APPPATH.'../assets';
 
 		foreach ($segments as $segment)
 		{
