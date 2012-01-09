@@ -7,56 +7,41 @@
  */
 
 class Event extends CI_Model
-{ 
-	public function __construct()
-	{
-		if (isset($this->db->conn_id) != true)
-		{
-			trigger_error('Cannot operate Event model without database.');
-		}	
-	}
-	
+{
 	// Log New Event
 	public function log($event_type,$pid=false,$data=false)
 	{
-		$ip_address = $this->input->ip_address();
-		
-		$q = $this->db	->set('event_type', $event_type)
-						->set('ip_address', 'INET_ATON(\''.$ip_address.'\')',false);
-		
-		if ($pid !== false)
+		$data['ip_address'] = $this->input->ip_address();
+		$data['event_type'] = $event_type;
+		$data['data'] = $data;
+
+		$profile = $this->profile->get($pid);
+
+		if ($pid !== false AND $profile->exists() === true)
 		{
-			$q->set('pid', $pid);
-		}
-		
-		if ($data !== false)
-		{
-			$q->set('data',serialize($data));
-		}
-					
-		if ($q->insert('event_log'))
-		{
-			return $this->db->insert_id();
+			$data['pid'] = $profile->pid;
 		}
 		else
 		{
-			return false;
+			$data['pid'] = $this->profile->current();
 		}
+
+		$this->api->request('get', 'log/event', $data);
 	}
-	
+
 	public function get($evid)
 	{
 		$this->load->helper(array('array'));
 		$this->load->language('event');
-		
-		$data = $this->db	
+
+		$data = $this->db
 					->select('*')
 					->select('inet_ntoa(ip_address) as ip_address',false)
 					->limit(1)
 					->where('evid',$evid)
 					->get('event_log')
 					->row();
-		
+
 		if (count($data) > 0)
 		{
 			$data->template = $this->lang->line('event_'.$data->event_type);
@@ -74,30 +59,30 @@ class Event extends CI_Model
 	{
 		$this->load->helper(array('array'));
 		$this->load->language('event');
-		
+
 		$data = array();
-		
-		$result = $this->db	
+
+		$result = $this->db
 					->select('*')
 					->select('inet_ntoa(ip_address) as ip_address',false)
 					->order_by('timestamp','desc')
 					->limit($limit,$offset)
 					->get('event_log')
 					->result_array();
-		
+
 		foreach ($result as $row) {
 			$template = $this->lang->line('event_'.element('event_type',$row));
 			$data[] = array_merge($row,array('event_template'=>$template));
 		}
-		
+
 		return $data;
 	}
-	
+
 	// Parse Data Into Language File Entry
 	private function parse_lang($event_row)
 	{
 		// Accepts entire row from event log as argument.
 	}
-	
+
 }
 // End of File
