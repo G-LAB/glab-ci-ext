@@ -1,11 +1,11 @@
 <?php
 
 class Data_model extends CI_Model {
-								
+
 	function countries ($key=null) {
-		
+
 		$this->load->helper('array');
-		
+
 		$data = array(
 			  "GB" => "United Kingdom",
 			  "US" => "United States",
@@ -247,7 +247,7 @@ class Data_model extends CI_Model {
 			  "ZM" => "Zambia",
 			  "ZW" => "Zimbabwe"
 		);
-		
+
 		if ($key != null) return element($key,$data);
 		else return $data;
 	}
@@ -255,14 +255,14 @@ class Data_model extends CI_Model {
 	function months ($short=FALSE) {
 		if ($short) $list = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
 		else $list = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
-		
+
 		return $list;
 	}
-	
+
 	function order_status() {
-		
+
 		$this->load->helper('array');
-		
+
 		$data['cancelled'] = "Cancelled";
 		$data['active'] = "Active";
 		$data['complete'] = "Complete";
@@ -272,39 +272,39 @@ class Data_model extends CI_Model {
 
 		asort($data);
 		return $data;
-		
+
 	}
 
 	function states ($key=null) {
-		
+
 		$this->load->helper('array');
-		
-		$data = array(	'AL'=>"Alabama",  
-						'AK'=>"Alaska",  
-						'AZ'=>"Arizona",  
-						'AR'=>"Arkansas",  
-						'CA'=>"California",  
-						'CO'=>"Colorado",  
-						'CT'=>"Connecticut",  
-						'DE'=>"Delaware",  
-						'DC'=>"District Of Columbia",  
-						'FL'=>"Florida",  
-						'GA'=>"Georgia",  
-						'HI'=>"Hawaii",  
-						'ID'=>"Idaho",  
-						'IL'=>"Illinois",  
-						'IN'=>"Indiana",  
-						'IA'=>"Iowa",  
-						'KS'=>"Kansas",  
-						'KY'=>"Kentucky",  
-						'LA'=>"Louisiana",  
-						'ME'=>"Maine",  
-						'MD'=>"Maryland",  
-						'MA'=>"Massachusetts",  
-						'MI'=>"Michigan",  
-						'MN'=>"Minnesota",  
-						'MS'=>"Mississippi",  
-						'MO'=>"Missouri",  
+
+		$data = array(	'AL'=>"Alabama",
+						'AK'=>"Alaska",
+						'AZ'=>"Arizona",
+						'AR'=>"Arkansas",
+						'CA'=>"California",
+						'CO'=>"Colorado",
+						'CT'=>"Connecticut",
+						'DE'=>"Delaware",
+						'DC'=>"District Of Columbia",
+						'FL'=>"Florida",
+						'GA'=>"Georgia",
+						'HI'=>"Hawaii",
+						'ID'=>"Idaho",
+						'IL'=>"Illinois",
+						'IN'=>"Indiana",
+						'IA'=>"Iowa",
+						'KS'=>"Kansas",
+						'KY'=>"Kentucky",
+						'LA'=>"Louisiana",
+						'ME'=>"Maine",
+						'MD'=>"Maryland",
+						'MA'=>"Massachusetts",
+						'MI'=>"Michigan",
+						'MN'=>"Minnesota",
+						'MS'=>"Mississippi",
+						'MO'=>"Missouri",
 						'MT'=>"Montana",
 						'NE'=>"Nebraska",
 						'NV'=>"Nevada",
@@ -314,45 +314,45 @@ class Data_model extends CI_Model {
 						'NY'=>"New York",
 						'NC'=>"North Carolina",
 						'ND'=>"North Dakota",
-						'OH'=>"Ohio",  
-						'OK'=>"Oklahoma",  
-						'OR'=>"Oregon",  
-						'PA'=>"Pennsylvania",  
-						'RI'=>"Rhode Island",  
-						'SC'=>"South Carolina",  
+						'OH'=>"Ohio",
+						'OK'=>"Oklahoma",
+						'OR'=>"Oregon",
+						'PA'=>"Pennsylvania",
+						'RI'=>"Rhode Island",
+						'SC'=>"South Carolina",
 						'SD'=>"South Dakota",
-						'TN'=>"Tennessee",  
-						'TX'=>"Texas",  
-						'UT'=>"Utah",  
-						'VT'=>"Vermont",  
-						'VA'=>"Virginia",  
-						'WA'=>"Washington",  
-						'WV'=>"West Virginia",  
-						'WI'=>"Wisconsin",  
+						'TN'=>"Tennessee",
+						'TX'=>"Texas",
+						'UT'=>"Utah",
+						'VT'=>"Vermont",
+						'VA'=>"Virginia",
+						'WA'=>"Washington",
+						'WV'=>"West Virginia",
+						'WI'=>"Wisconsin",
 						'WY'=>"Wyoming"
 				);
-		
+
 		if ($key != null) return element($key,$data);
 		else return $data;
 	}
 
 	function type_address ($key=null) {
-		
+
 		$this->load->helper('array');
-		
+
 		$data['WORK'] = "Work";
 		$data['home'] = "Home";
 		$data['POSTAL'] = "Postal";
 		$data['PARCEL'] = "Shipping";
-		
+
 		if ($key != null) return element($key,$data);
 		else return $data;
 	}
 
 	function type_tel ($key=null) {
-		
+
 		$this->load->helper('array');
-		
+
 		$data['VOICE'] = "Voice";
 		$data['home'] = "Home";
 		$data['cell'] = "Mobile";
@@ -361,7 +361,7 @@ class Data_model extends CI_Model {
 		$data['fax'] = "Fax";
 		$data['video'] = "Video";
 		$data['pager'] = "Pager";
-		
+
 		if ($key != null) return element($key,$data);
 		else return $data;
 	}
