@@ -6,7 +6,7 @@
  * Copyright 2011
  */
 
-class Document extends CI_Model
+class Document_Model extends CI_Model
 { 
 	private $S3_bucket;
 	

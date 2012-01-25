@@ -1,6 +1,6 @@
 <?php
 
-class Hosting extends CI_Model {
+class Hosting_Model extends CI_Model {
 	
 	function __construct () {
 		

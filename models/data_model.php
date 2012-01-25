@@ -1,6 +1,6 @@
 <?php
 
-class Data extends CI_Model {
+class Data_Model extends CI_Model {
 								
 	function countries ($key=null) {
 		

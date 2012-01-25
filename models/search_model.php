@@ -1,6 +1,6 @@
 <?php
 
-class Search extends CI_Model 
+class Search_Model extends CI_Model 
 {
 	
 	public $profiles;
@@ -14,7 +14,7 @@ class Search extends CI_Model
 
 }
 
-class Search_Profiles extends CI_Model 
+class Search_Profiles_Model extends CI_Model 
 {
 	
 	public function meta($key, $value='*')

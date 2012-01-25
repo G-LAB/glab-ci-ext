@@ -1,6 +1,6 @@
 <?php
 
-class Entity extends CI_Model {
+class Entity_Model extends CI_Model {
 
 	public $entities;
 

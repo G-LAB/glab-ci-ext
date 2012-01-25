@@ -6,7 +6,7 @@
  * Copyright 2009
  */
 
-class Accounting extends CI_Model { 
+class Accounting_Model extends CI_Model { 
 	
 	function getTrialBalance () {
 		$accounts = $this->getAccounts(true);
