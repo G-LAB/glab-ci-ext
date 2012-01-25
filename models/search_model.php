@@ -1,6 +1,6 @@
 <?php
 
-class Search_Model extends CI_Model 
+class Search_model extends CI_Model 
 {
 	
 	public $profiles;

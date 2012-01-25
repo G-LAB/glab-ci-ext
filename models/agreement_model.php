@@ -1,6 +1,6 @@
 <?php
 
-class Agreement extends CI_Model {
+class Agreement_model extends CI_Model {
 								
 	function get ($agid=FALSE) {
 		

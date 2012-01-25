@@ -1,5 +1,5 @@
 <?php
-class Brand_Model extends CI_Model {
+class Brand_model extends CI_Model {
 	
 	function __construct () {
 		

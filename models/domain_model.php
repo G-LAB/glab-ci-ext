@@ -1,6 +1,6 @@
 <?php
 
-class Domain_Model extends CI_Model {
+class Domain_model extends CI_Model {
 
 	function __construct ()
 	{

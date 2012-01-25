@@ -1,6 +1,6 @@
 <?php
 
-class Ticket_Model extends CI_Model {
+class Ticket_model extends CI_Model {
 	
 	public $queues;
 	
