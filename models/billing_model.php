@@ -4,13 +4,22 @@ class Billing_model extends CI_Model {
 
 	function __construct () {
 		parent::__construct();
-		$this->load->model('accounting');
+		$this->load->helper(array('array','glib_array'));
+		$this->load->model('accounting_model','accounting');
 	}
 
+	/**
+	 * Get Total Count of Batch Errors
+	 * @return int
+	 */
 	function getBatchErrorCount() {
 		return array_sum($this->getBatchErrorCountsByGateway());
 	}
 
+	/**
+	 * Get Count of Batch Errors Separated by Gateway
+	 * @return array
+	 */
 	function getBatchErrorCountsByGateway () {
 
 		$counts = array();
@@ -22,6 +31,10 @@ class Billing_model extends CI_Model {
 		return $counts;
 	}
 
+	/**
+	 * Get Batch Errors Array Separated by Gateway
+	 * @return array
+	 */
 	function getBatchErrorsByGateway () {
 
 		$errors = array();
@@ -33,6 +46,11 @@ class Billing_model extends CI_Model {
 		return $errors;
 	}
 
+	/**
+	 * Get Batch Errors Array for a Gateway
+	 * @param  int $pgid Gateway ID
+	 * @return array
+	 */
 	function getBatchErrors ($pgid) {
 		return $this->getGatewayInstance($pgid)->get_batch_errors();
 	}
@@ -93,8 +111,9 @@ class Billing_model extends CI_Model {
 		return $instances;
 	}
 
-	function getInvoices() {
+	function getInvoices($limit, $offset) {
 	    $this->db->select("*, (subtotal + tax) as total, (SELECT COUNT(*) FROM billing_invoices_items WHERE ivid = billing_invoices.ivid) as countItems",FALSE);
+	    $this->db->limit($limit, $offset);
 	    $query = $this->db->get('billing_invoices');
 	    return $query->result_array();
 	}
@@ -131,10 +150,11 @@ class Billing_model extends CI_Model {
 		return $query->result_array();
 	}
 
-    function getProducts() {
+    function getProducts($limit, $offset) {
         $this->db->order_by('s.sku','DESC');
         $this->db->join('(SELECT * FROM billing_products_versions ORDER BY skuvid DESC) v','s.sku=v.sku','left',FALSE);
         $this->db->group_by('s.sku');
+        $this->db->limit($limit, $offset);
         $query = $this->db->get('billing_products_skus s');
         return $query->result_array();
     }
@@ -148,10 +168,12 @@ class Billing_model extends CI_Model {
 		return $query->row_array();
 	}
 
-    function getOrders($status=false) {
+    function getOrders($status=false, $limit, $offset) {
 
         if ($status) $this->db->where('status',$status);
-        else $this->db->where('status !=','cancelled');
+        else $this->db->where_not_in('status', array('cancelled', 'complete'));
+
+        $this->db->limit($limit, $offset);
 
         $query = $this->db->get('billing_orders');
 
@@ -232,7 +254,7 @@ class Billing_model extends CI_Model {
 	private function updateInvoice ($ivid) {
 		$invoice = $this->getInvoice($ivid);
 		$order = $this->getOrder($invoice['orid']);
-		$addr = $this->entity->getAddress($order['addrid']);
+		$addr = $this->entity->getAddress($order['addrid']); // @todo pull from profile data
 		$taxMult = $this->getTaxMultiplier($addr['state']);
 
 		$subtotal = 0;
@@ -263,10 +285,10 @@ class Billing_model extends CI_Model {
 		$this->db->update('billing_orders');
 	}
 
-	function addOrder ($eid) {
+	function addOrder ($pid) {
 
-		$data['eid'] = $eid;
-		$data['eidCreated'] = $this->entity->getEID();
+		$data['pid'] = $pid;
+		$data['event'] = null; // @todo
 
 		$this->db->insert('billing_orders',$data);
 		return $this->db->insert_id();
@@ -309,7 +331,7 @@ class Billing_model extends CI_Model {
 	private function addInvoice ($orid) {
 		$invoice = array (
 			'orid' => $orid,
-			'eidCreated' => $this->entity->getEID()
+			'event' => null // @todo
 		);
 		$this->db->insert('billing_invoices',$invoice);
 		return $this->db->insert_id();
