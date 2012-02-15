@@ -6,7 +6,7 @@
  * Copyright 2011
  */
 
-class Event extends CI_Model
+class Event_model extends CI_Model
 {
 	// Log New Event
 	public function log($event_type,$pid=false,$data=false)

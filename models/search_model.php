@@ -1,11 +1,11 @@
 <?php
 
-class Search extends CI_Model 
+class Search_model extends CI_Model
 {
-	
+
 	public $profiles;
 
-	function __construct () 
+	function __construct ()
 	{
 		parent::__construct();
 
@@ -14,9 +14,9 @@ class Search extends CI_Model
 
 }
 
-class Search_Profiles extends CI_Model 
+class Search_Profiles_Model extends CI_Model
 {
-	
+
 	public function meta($key, $value='*')
 	{
 		$q = $this->db;
