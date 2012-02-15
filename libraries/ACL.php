@@ -18,7 +18,7 @@ class ACL
 
 		$this->CI->load->library('session');
 		$this->CI->load->helper('url');
-		$this->CI->load->model(array('profile','event'));
+		$this->CI->load->model('profile');
 
 		// Send to Login if No Session
 		if ($this->is_permitted($this->CI->router->fetch_class()) !== true)
@@ -88,7 +88,7 @@ class ACL
 		$CI =& get_instance();
 		$CI->load->library('session');
 		$CI->session->set_userdata('pid', $pid);
-		$CI->event->log('auth_success',$pid);
+
 		return TRUE;
 	}
 
