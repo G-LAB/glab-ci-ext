@@ -14,8 +14,7 @@ class ACL
 
 	function __construct ()
 	{
-
-		$this->CI = $CI =& get_instance();
+		$this->CI =& get_instance();
 
 		$this->CI->load->library('session');
 		$this->CI->load->helper('url');
