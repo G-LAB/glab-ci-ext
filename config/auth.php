@@ -10,6 +10,9 @@ $config['auth_mail_incoming_pass'] = '3puPdwPk6bQNoC';
 
 $config['auth_mediatemple_key'] = 'FbDgCrdQNr9V31Vt1u46Kwtsm3FbSE4TBJZp3z2CxWxl58gtlmunpO3loADrBwyja';
 
+$config['auth_mailchimp_key'] = '0139feeadfbb3c48b9a2cf3d56b295e8-us1';
+$config['auth_mailchimp_list'] = '8ff86b39d8';
+
 $config['auth_opensrs_user'] = 'glabstudios';
 $config['auth_opensrs_key'] = '4414f26fda25e394c817f7e2850b0bdc4f05fbbb09ac1f9589fbadb665c73cebb757ab5c9b05c742754db198a6fdecfd023fcdffa4b31032';
 
