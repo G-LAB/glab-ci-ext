@@ -12,118 +12,149 @@ class ACL
 	private $CI;
 	private $acl;
 
-	function __construct ()
+	private $permissions = array();
+
+	public function __construct ($permissions)
 	{
 		$this->CI =& get_instance();
 
 		$this->CI->load->library('session');
 		$this->CI->load->helper('url');
-		$this->CI->load->model(array('profile','event'));
+		$this->CI->load->model('profile');
 
-		// Send to Login if No Session
-		if ($this->is_permitted($this->CI->router->fetch_class()) !== true)
+		if (is_array($permissions) === true)
 		{
-			redirect('login');
+			$this->permissions = $permissions;
 		}
-		// Run ACL Check
-		else
-		{
-
-			require_once 'Zend/Acl.php';
-			require_once 'Zend/Acl/Role.php';
-			require_once 'Zend/Acl/Resource.php';
-
-			// Load Up Zend ACL
-			$this->acl = new Zend_Acl();
-			/*
-			// Set Roles
-			$this->acl	->addRole(new Zend_Acl_Role('guest'))
-						->addRole(new Zend_Acl_Role('client'), 'guest')
-						->addRole(new Zend_Acl_Role('employee'))
-						->addRole(new Zend_Acl_Role('administrator'), 'employee');
-
-			// Set Resources
-			// Get Controllers for this App
-			$controllers = glob(APPPATH.'controllers/*.php');
-			foreach ($controllers as $controller)
-				$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_'.basename($controller,EXT) ));
-
-			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_domain_names' ));
-			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_web_hosting' ));
-			$this->acl->add(new Zend_Acl_Resource( $this->CI->config->item('app_name').'_cortex' ));
-
-			// Set User Roles
-			$parent[] = 'guest';
-
-			if ($eid) $parent[] = 'client';
-
-			if ($eid) $employee = $this->CI->db->get_where('entities_admin','eid = '.$eid);
-			if ($eid && $employee->num_rows() == 1) {
-				$parent[] = 'employee';
-			}
-
-			if ($eid == 1) $parent[] = 'administrator';
-
-
-			$this->acl->addRole(new Zend_Acl_Role("$eid"), $parent);
-
-			// PERMISSIONS
-			// Deny All
-			//$this->acl->deny();
-
-			foreach ($whitelist as $wl) $this->acl->allow('guest', 'cms_'.$wl);
-			$this->acl->allow('employee');*/
-
-			// Validate Login
-			//$error_msg = "<div class=\"error msg\">Sorry, you do not have permission to access this page.</div>";
-			//$error_msg.= "<p>If you feel this message is in error, please contact us at 1.877.620.GLAB.</p>";
-			//if ($this->is_permitted($this->CI->router->fetch_class()) !== true) show_error($error_msg,403);
-
-		}
-
 	}
 
-	function create_session ($pid)
+	public function allow ($role, $resource, $action=false)
+	{
+		$role = $this->process_role($role);
+
+		if ($action == true)
+		{
+			$this->allow($role, $resource, false);
+			$this->permissions[$role][$resource][] = $action;
+			log_message('debug','ACL: Allow '.$role.' to perform '.$action.' action on '.$resource);
+		}
+		elseif (isset($this->permissions[$role][$resource]) !== true)
+		{
+			$this->permissions[$role][$resource] = array();
+			log_message('debug','ACL: Allow '.$role.' access to '.$resource);
+		}
+	}
+
+	public function create_session ($pid)
 	{
 		$CI =& get_instance();
 		$CI->load->library('session');
 		$CI->session->set_userdata('pid', $pid);
-		$CI->event->log('auth_success',$pid);
+
 		return TRUE;
 	}
 
-	function get_pid ()
+	public function get_pid ()
 	{
 		return $this->CI->session->userdata('pid');
 	}
 
-	function is_auth()
+	public function is_auth()
 	{
 		return ($this->get_pid()) ? true : false;
 	}
 
-	function is_permitted($resource=false,$action=false,$pid=false)
+	public function is_allowed ($resource, $action=false, $role=false)
 	{
-		$white_list[] = 'asset';
-		$white_list[] = 'login';
-		$white_list[] = 'test';
-
-		if ($this->is_auth() === true  ||  in_array(strtolower($resource),$white_list) === true)
+		// Assume current user if no role specified
+		if ($role == false)
 		{
+			$role = $this->get_pid();
+
+			// Default to guest group if no PID
+			if ($role != true)
+			{
+				$role = ':guest';
+			}
+		}
+
+		$role = $this->process_role($role);
+
+		$result = $this->process_acl($resource, $action, $role);
+
+		if ($result === true)
+		{
+			log_message('info','ACL: Permission granted to '.$role.' accessing '.$resource);
 			return true;
 		}
 		else
 		{
+			log_message('debug','ACL: Permission denied to '.$role.' accessing '.$resource);
 			return false;
 		}
 	}
 
-	function require_ssl()
+	public function process_acl ($resource, $action, $role)
 	{
-		if($_SERVER["HTTPS"] != "on") {
-		   header("HTTP/1.1 301 Moved Permanently");
-		   header("Location: https://" . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"]);
-		   exit();
+		log_message('info','ACL: Test if '.$role.' can access '.$resource);
+
+		// Check if direct match for requested role without action
+		if (isset($this->permissions[$role][$resource]) === true  && $action == false)
+		{
+			return true;
+		}
+		// Check if direct match for requested role with action
+		elseif (isset($this->permissions[$role][$resource]) === true  && in_array($action, $this->permissions[$role][$resource]) === true)
+		{
+			return true;
+		}
+		// If role exists, check member groups
+		elseif (isset($this->permissions[$role]) === true)
+		{
+			// Check groups granted by inhertiance
+			foreach ($this->permissions[$role] as $group=>$actions)
+			{
+				// Check if resource is a group id
+				if (substr($group, 0, 1) == ':')
+				{
+					$result = $this->process_acl($resource,$action,$group);
+
+					if ($result == true)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		else
+		{
+			log_message('debug','ACL: Role '.$role.' does not exist');
+			return false;
+		}
+	}
+
+	private function process_role ($str)
+	{
+		// User and Group
+		if (strpos($str,':') !== false)
+		{
+			return $str;
+		}
+		// User Member of Own Group
+		else
+		{
+			return $str.':'.$str;
+		}
+	}
+
+	public function require_ssl ()
+	{
+		if(isset($_SERVER['HTTPS']) === false OR $_SERVER['HTTPS'] != 'on')
+		{
+			log_message('ACL: Redirecting to SSL');
+			header('HTTP/1.1 301 Moved Permanently');
+			header('Location: https://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+			exit();
 		}
 	}
 
